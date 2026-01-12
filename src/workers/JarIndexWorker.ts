@@ -10,7 +10,6 @@ interface Indexer {
     getClassData(): ClassDataString[];
 }
 
-
 export type ClassDataString = `${string}|${string}|${number}|${string}`;
 
 let indexerFunc: Indexer | null = null;
@@ -18,7 +17,7 @@ let indexerFunc: Indexer | null = null;
 const getIndexer = async (): Promise<Indexer> => {
     if (!indexerFunc) {
         try {
-            const teavm = (await load(indexerWasm)) as unknown as { exports: Indexer; };
+            const teavm = (await load(indexerWasm)) as unknown as { exports: Indexer };
 
             indexerFunc = teavm.exports;
         } catch (e) {
@@ -39,13 +38,11 @@ export const index = async (data: ArrayBufferLike): Promise<void> => {
 export const getUsage = async (key: UsageKey): Promise<[UsageString]> => {
     const indexer = await getIndexer();
 
-
     return indexer.getUsage(key);
 };
 
 export const getUsageSize = async (): Promise<number> => {
     const indexer = await getIndexer();
-
 
     return indexer.getUsageSize();
 };
@@ -53,13 +50,11 @@ export const getUsageSize = async (): Promise<number> => {
 export const getBytecode = async (classData: ArrayBufferLike[]): Promise<string> => {
     const indexer = await getIndexer();
 
-
     return indexer.getBytecode(classData);
 };
 
 export const getClassData = async (): Promise<ClassDataString[]> => {
     const indexer = await getIndexer();
-
 
     return indexer.getClassData();
 };

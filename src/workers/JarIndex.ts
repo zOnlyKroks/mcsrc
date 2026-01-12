@@ -19,7 +19,6 @@ export interface ClassData {
 export function parseClassData(data: ClassDataString): ClassData {
     const [className, superName, accessFlagsStr, interfacesStr] = data.split("|");
 
-
     return {
         className,
         superName,
@@ -116,7 +115,9 @@ export class JarIndex {
                                     indexProgress.next(Math.round((completed / classNames.length) * 100));
                                 }
                             }
-                        })().then((indexed) => resolve(indexed)).catch(reject);
+                        })()
+                            .then((indexed) => resolve(indexed))
+                            .catch(reject);
                     })
                 );
             }

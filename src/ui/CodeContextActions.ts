@@ -9,9 +9,9 @@ async function setClipboard(text: string): Promise<void> {
 }
 
 export function createCopyAwAction(
-    decompileResultRef: { current: DecompileResult | undefined; },
-    classListRef: { current: string[] | undefined; },
-    messageApi: { error: (_msg: string) => void; success: (_msg: string) => void; }
+    decompileResultRef: { current: DecompileResult | undefined },
+    classListRef: { current: string[] | undefined },
+    messageApi: { error: (_msg: string) => void; success: (_msg: string) => void }
 ) {
     return {
         id: "copy_aw",
@@ -50,9 +50,9 @@ export function createCopyAwAction(
 }
 
 export function createCopyMixinAction(
-    decompileResultRef: { current: DecompileResult | undefined; },
-    classListRef: { current: string[] | undefined; },
-    messageApi: { error: (_msg: string) => void; success: (_msg: string) => void; }
+    decompileResultRef: { current: DecompileResult | undefined },
+    classListRef: { current: string[] | undefined },
+    messageApi: { error: (_msg: string) => void; success: (_msg: string) => void }
 ) {
     return {
         id: "copy_mixin",
@@ -91,9 +91,9 @@ export function createCopyMixinAction(
 }
 
 export function createFindUsagesAction(
-    decompileResultRef: { current: DecompileResult | undefined; },
-    classListRef: { current: string[] | undefined; },
-    messageApi: { error: (_msg: string) => void; },
+    decompileResultRef: { current: DecompileResult | undefined },
+    classListRef: { current: string[] | undefined },
+    messageApi: { error: (_msg: string) => void },
     usageQueryNext: (_value: string) => void
 ) {
     return {
@@ -132,8 +132,8 @@ export function createFindUsagesAction(
 }
 
 export function createViewInheritanceAction(
-    decompileResultRef: { current: DecompileResult | undefined; },
-    messageApi: { error: (_msg: string) => void; },
+    decompileResultRef: { current: DecompileResult | undefined },
+    messageApi: { error: (_msg: string) => void },
     selectedInheritanceClassNameNext: (_value: string) => void
 ) {
     return {

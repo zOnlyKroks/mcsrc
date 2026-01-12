@@ -103,7 +103,6 @@ const KeybindControl: React.FC<KeybindProps> = ({ setting, title }) => {
                 if (k == " ") return "<space>";
                 const key = k.trim();
 
-
                 return key.charAt(0).toUpperCase() + key.slice(1);
             })
             .join("+");

@@ -8,7 +8,7 @@ import { activeJavadocToken, getJavadocForToken, javadocData, setTokenJavadoc } 
 import JavadocMarkdownEditor from "./JavadocMarkdownEditor";
 import { type UpdateTarget, javadocApi } from "./api/JavadocApi";
 
-const ModalBody = ({ token, onValueChange }: { token: Token; onValueChange: (_value: string | undefined) => void; }) => {
+const ModalBody = ({ token, onValueChange }: { token: Token; onValueChange: (_value: string | undefined) => void }) => {
     const initialValue = useMemo(() => getJavadocForToken(token, javadocData.value) || "", [token]);
 
     return (

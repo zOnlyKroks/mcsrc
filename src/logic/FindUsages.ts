@@ -1,11 +1,4 @@
-import {
-    BehaviorSubject,
-    distinctUntilChanged,
-    from,
-    map,
-    switchMap,
-    throttleTime,
-} from "rxjs";
+import { BehaviorSubject, distinctUntilChanged, from, map, switchMap, throttleTime } from "rxjs";
 import { type UsageKey, type UsageString, jarIndex } from "../workers/JarIndex";
 import type { DecompileResult } from "./Decompiler";
 import { openTab } from "./Tabs";
@@ -32,12 +25,10 @@ export function formatUsage(usage: UsageString): string {
     if (usage.startsWith("m:")) {
         const parts = usage.slice(2).split(":");
 
-
         return `${parts[1]}${parts[2]}`;
     }
     if (usage.startsWith("f:")) {
         const parts = usage.slice(2).split(":");
-
 
         return parts[1];
     }
@@ -58,13 +49,11 @@ export function formatUsageQuery(query: UsageKey): string {
             const parts = query.split(":");
             const className = parts[0].split("/").pop() || parts[0];
 
-
             return `${className}.${parts[1]}${parts[2]}`;
         }
         case "field": {
             const parts = query.split(":");
             const className = parts[0].split("/").pop() || parts[0];
-
 
             return `${className}.${parts[1]}`;
         }

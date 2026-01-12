@@ -1,7 +1,8 @@
 import { BehaviorSubject, combineLatest, distinctUntilChanged, map } from "rxjs";
-import { diffView } from "./Diff";
 import { selectedMinecraftVersion } from "./MinecraftApi";
 import { resetPermalinkAffectingSettings, supportsPermalinking } from "./Settings";
+
+import { diffView } from "./Diff";
 
 export interface State {
     version: number; // Allows us to change the permalink structure in the future
@@ -66,35 +67,38 @@ export const selectedFile = state.pipe(
     distinctUntilChanged()
 );
 
-combineLatest([state, supportsPermalinking]).subscribe(([s, supported]) => {
-    if (s.version === 0) {
-        return;
-    }
-
-    document.title = s.file.split("/").pop()?.replace(".class", "") || s.file;
-
-    if (!supported) {
-        window.location.hash = "";
-
-        return;
-    }
-
-    let url = `#${s.version}/${s.minecraftVersion}/${s.file.replace(".class", "")}`;
-
-    if (s.line) {
-        if (s.lineEnd && s.lineEnd !== s.line) {
-            url += `#L${Math.min(s.line, s.lineEnd)}-${Math.max(s.line, s.lineEnd)}`;
-        } else {
-            url += `#L${s.line}`;
+// Defer subscription to avoid circular dependency issues
+setTimeout(() => {
+    combineLatest([state, supportsPermalinking]).subscribe(([s, supported]) => {
+        if (s.version === 0) {
+            return;
         }
-    }
 
-    if (diffView.value) {
-        url = "";
-    }
+        document.title = s.file.split("/").pop()?.replace(".class", "") || s.file;
 
-    window.history.replaceState({}, "", url);
-});
+        if (!supported) {
+            window.location.hash = "";
+
+            return;
+        }
+
+        let url = `#${s.version}/${s.minecraftVersion}/${s.file.replace(".class", "")}`;
+
+        if (s.line) {
+            if (s.lineEnd && s.lineEnd !== s.line) {
+                url += `#L${Math.min(s.line, s.lineEnd)}-${Math.max(s.line, s.lineEnd)}`;
+            } else {
+                url += `#L${s.line}`;
+            }
+        }
+
+        if (diffView.value) {
+            url = "";
+        }
+
+        window.history.replaceState({}, "", url);
+    });
+}, 0);
 
 export function updateSelectedMinecraftVersion() {
     const previous = state.value;

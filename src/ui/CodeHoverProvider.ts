@@ -23,15 +23,18 @@ function parseIntegerLiteral(text: string): IntegerLiteral | null {
         const hexPart = absText.slice(2).replace(/[lL]$/, "");
 
         value = Number.parseInt(hexPart, 16);
-    } else if (/^0[bB][01]+[lL]?$/.test(absText)) { // Binary: 0b or 0B
+    } else if (/^0[bB][01]+[lL]?$/.test(absText)) {
+        // Binary: 0b or 0B
         const binPart = absText.slice(2).replace(/[lL]$/, "");
 
         value = Number.parseInt(binPart, 2);
-    } else if (/^0[0-7]+[lL]?$/.test(absText)) { // Octal: 0 followed by digits
+    } else if (/^0[0-7]+[lL]?$/.test(absText)) {
+        // Octal: 0 followed by digits
         const octPart = absText.replace(/[lL]$/, "");
 
         value = Number.parseInt(octPart, 8);
-    } else if (/^\d+[lL]?$/.test(absText)) { // Decimal
+    } else if (/^\d+[lL]?$/.test(absText)) {
+        // Decimal
         const decPart = absText.replace(/[lL]$/, "");
 
         value = Number.parseInt(decPart, 10);
@@ -51,25 +54,23 @@ function parseIntegerLiteral(text: string): IntegerLiteral | null {
     return { value, originalText: text, isNegative };
 }
 
-function intToRGBA(value: number): { r: number; g: number; b: number; a: number; } {
+function intToRGBA(value: number): { r: number; g: number; b: number; a: number } {
     // Interpret as ARGB (common in Java/Android)
     const a = (value >>> 24) & 0xff;
     const r = (value >>> 16) & 0xff;
     const g = (value >>> 8) & 0xff;
     const b = value & 0xff;
 
-
     return { r, g, b, a };
 }
 
-function formatColorPreview(rgba: { r: number; g: number; b: number; a: number; }): string {
+function formatColorPreview(rgba: { r: number; g: number; b: number; a: number }): string {
     const { r, g, b, a } = rgba;
     const alpha = (a / 255).toFixed(2);
 
     // Convert to hex color for Monaco's HTML sanitizer
     // Monaco only allows color:#RRGGBB; and background-color:#RRGGBB; in span style attributes when isTrusted is set
     const hexColor = `#${r.toString(16).padStart(2, "0")}${g.toString(16).padStart(2, "0")}${b.toString(16).padStart(2, "0")}`;
-
 
     return `<span style="color:${hexColor};">rgba(${r}, ${g}, ${b}, ${alpha})</span>`;
 }
@@ -131,21 +132,19 @@ function parseDescriptor(descriptor: string): string {
 
         const [returnType] = parseType(returnTypeStr, 0);
 
-
         return `(${params.join(", ")}) → ${returnType}`;
     } else {
         // Field descriptor
         const [type] = parseType(descriptor, 0);
-
 
         return type;
     }
 }
 
 export function createHoverProvider(
-    editorRef: { current: editor.ICodeEditor | null; },
-    decompileResultRef: { current: DecompileResult | undefined; },
-    classListRef: { current: string[] | undefined; }
+    editorRef: { current: editor.ICodeEditor | null },
+    decompileResultRef: { current: DecompileResult | undefined },
+    classListRef: { current: string[] | undefined }
 ) {
     return {
         provideHover(model: editor.ITextModel, position: IPosition) {

@@ -49,28 +49,31 @@ const Code = () => {
 
     const [resetViewTrigger, setResetViewTrigger] = useState(false);
 
-    const applyTokenDecorations = useCallback((model: editor.ITextModel) => {
-        if (!decompileResult) return;
+    const applyTokenDecorations = useCallback(
+        (model: editor.ITextModel) => {
+            if (!decompileResult) return;
 
-        // Reapply token decorations for the current tab
-        if (editorRef.current && decompileResult.tokens) {
-            const decorations = decompileResult.tokens.map((token) => {
-                const startPos = model.getPositionAt(token.start);
-                const endPos = model.getPositionAt(token.start + token.length);
-                const canGoTo = !token.declaration && classList && classList.includes(token.className + ".class");
+            // Reapply token decorations for the current tab
+            if (editorRef.current && decompileResult.tokens) {
+                const decorations = decompileResult.tokens.map((token) => {
+                    const startPos = model.getPositionAt(token.start);
+                    const endPos = model.getPositionAt(token.start + token.length);
+                    const canGoTo = !token.declaration && classList && classList.includes(token.className + ".class");
 
-                return {
-                    range: new Range(startPos.lineNumber, startPos.column, endPos.lineNumber, endPos.column),
-                    options: {
-                        inlineClassName: token.type + "-token-decoration" + (canGoTo ? "-pointer" : ""),
-                    },
-                };
-            });
+                    return {
+                        range: new Range(startPos.lineNumber, startPos.column, endPos.lineNumber, endPos.column),
+                        options: {
+                            inlineClassName: token.type + "-token-decoration" + (canGoTo ? "-pointer" : ""),
+                        },
+                    };
+                });
 
-            decorationsCollectionRef.current?.clear();
-            decorationsCollectionRef.current = editorRef.current.createDecorationsCollection(decorations);
-        }
-    }, [decompileResult, classList]);
+                decorationsCollectionRef.current?.clear();
+                decorationsCollectionRef.current = editorRef.current.createDecorationsCollection(decorations);
+            }
+        },
+        [decompileResult, classList]
+    );
 
     // Keep refs updated
     useEffect(() => {

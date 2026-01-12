@@ -83,13 +83,11 @@ async function fetchVersions(): Promise<VersionsList> {
         if (!match) return false;
         const major = Number.parseInt(match[1], 10);
 
-
         return major >= 26;
     });
     const versions = filteredMojangVersions
         .concat(EXPERIMENTAL_VERSIONS.versions)
         .sort((a, b) => b.releaseTime.localeCompare(a.releaseTime));
-
 
     return {
         versions: versions,
@@ -102,7 +100,6 @@ async function fetchVersionManifest(version: VersionListEntry): Promise<VersionM
 
 function getVersionEntryById(id: string): VersionListEntry | undefined {
     const versions = minecraftVersions.value;
-
 
     return versions.find((v) => v.id === id);
 }

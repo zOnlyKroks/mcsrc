@@ -80,7 +80,7 @@ export class KeybindSetting {
         }
     }
 
-    parse(): { ctrl: boolean; alt: boolean; shift: boolean; cmd: boolean; key: string | null; } {
+    parse(): { ctrl: boolean; alt: boolean; shift: boolean; cmd: boolean; key: string | null } {
         const keys = this.value.split("+").map((k) => k.toLowerCase());
         const modifierKeys = ["ctrl", "alt", "shift", "cmd"];
         const mainKey = keys.find((k) => !modifierKeys.includes(k)) ?? null;

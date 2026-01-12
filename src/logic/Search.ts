@@ -5,7 +5,6 @@ export function getCamelCaseAcronym(str: string): string {
 export function matchesCamelCase(className: string, query: string): boolean {
     const acronym = getCamelCaseAcronym(className);
 
-
     return acronym.toLowerCase().startsWith(query.toLowerCase());
 }
 

@@ -19,7 +19,6 @@ const sortTreeNodes = (nodes: TreeDataNode[] = []) => {
         const aTitle = (a.title as string).toLowerCase();
         const bTitle = (b.title as string).toLowerCase();
 
-
         return aTitle.localeCompare(bTitle);
     });
     nodes.forEach((n) => {

@@ -7,7 +7,6 @@ import DiffFileList from "./DiffFileList";
 const DiffView = () => {
     const [sizes, setSizes] = useState<(number | string)[]>(["70%", "30%"]);
 
-
     return (
         <>
             <FilepathHeader />

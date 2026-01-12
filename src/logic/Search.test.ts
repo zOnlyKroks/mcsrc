@@ -110,7 +110,7 @@ describe("Search Algorithm", () => {
     });
 
     describe("Real-world Cases", () => {
-        it("should prioritize exact match \"Items\" over classes starting with \"Item\"", () => {
+        it('should prioritize exact match "Items" over classes starting with "Item"', () => {
             const classes = [
                 "net/minecraft/client/renderer/item/ItemStackRenderState",
                 "net/minecraft/client/gui/ItemSlotMouseAction",
@@ -124,7 +124,7 @@ describe("Search Algorithm", () => {
             expect(results[0]).toBe("net/minecraft/references/Items");
         });
 
-        it("should prioritize \"Items\" over \"Item\" when searching for \"Items\"", () => {
+        it('should prioritize "Items" over "Item" when searching for "Items"', () => {
             const classes = [
                 "net/minecraft/world/item/Item",
                 "net/minecraft/references/Items",

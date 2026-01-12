@@ -31,7 +31,6 @@ export const TabsComponent = () => {
         return Object.entries(tabRefs.current).map(([k, el]) => {
             const rect = el?.getBoundingClientRect();
 
-
             return {
                 key: k,
                 x: rect?.x ?? -1000,
@@ -152,7 +151,6 @@ export const TabsComponent = () => {
         const closest = rects
             .map((r) => {
                 const mid = r.x + r.width / 2 - startX;
-
 
                 return {
                     key: r.key,

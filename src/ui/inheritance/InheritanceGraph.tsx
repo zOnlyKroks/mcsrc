@@ -14,7 +14,6 @@ function buildGraphData(classNode: ClassNode): { nodes: Node[]; edges: Edge[] } 
     const getSimpleClassName = (fullName: string) => {
         const i = fullName.lastIndexOf("/");
 
-
         return i === -1 ? fullName : fullName.substring(i + 1);
     };
 
@@ -158,7 +157,6 @@ function buildGraphData(classNode: ClassNode): { nodes: Node[]; edges: Edge[] } 
     const layoutedNodes = nodes.map((node) => {
         const nodeWithPosition = dagreGraph.node(node.id);
 
-
         return {
             ...node,
             position: {
@@ -192,7 +190,6 @@ const InheritanceGraphInner = ({ data }: { data: ClassNode }) => {
                 void setCenter(selectedNode.position.x + 100, selectedNode.position.y + 25, { zoom: 1, duration: 300 });
             }
         }, 0);
-
 
         return () => clearTimeout(timer);
     }, [data, setCenter, getNode]);

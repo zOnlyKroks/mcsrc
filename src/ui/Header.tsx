@@ -20,7 +20,6 @@ export const HeaderBody = () => {
     const versions = useObservable(minecraftVersionIds);
     const currentVersion = useObservable(selectedMinecraftVersion);
 
-
     return (
         <Space align="center">
             <Select

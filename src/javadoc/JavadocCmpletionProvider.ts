@@ -81,7 +81,6 @@ export class JavdocCompletionProvider implements languages.CompletionItemProvide
         const lastOpenBracket = textBeforeCursor.lastIndexOf("[");
         const textAfterBracket = textBeforeCursor.substring(lastOpenBracket + 1);
 
-
         return textAfterBracket.startsWith("#");
     }
 

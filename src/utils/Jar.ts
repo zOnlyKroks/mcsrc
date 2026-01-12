@@ -8,7 +8,6 @@ export async function openJar(blob: Blob): Promise<Jar> {
     const reader = new BlobReader(blob);
     const zip = await read(reader);
 
-
     return new JarImpl(zip);
 }
 
@@ -17,7 +16,6 @@ export async function streamJar(url: string): Promise<Jar> {
     const zip = await read(reader, {
         naive: true,
     });
-
 
     return new JarImpl(zip);
 }
@@ -48,7 +46,6 @@ class BlobReader implements Reader {
     async read(offset: number, size: number): Promise<Uint8Array> {
         const slice = this.blob.slice(offset, offset + size);
         const arrayBuffer = await slice.arrayBuffer();
-
 
         return new Uint8Array(arrayBuffer);
     }
@@ -91,13 +88,11 @@ class HttpStreamReader implements Reader {
         const response = await this.fetchRange(offset, size);
         const arrayBuffer = await response.arrayBuffer();
 
-
         return new Uint8Array(arrayBuffer);
     }
 
     async slice(offset: number, size: number): Promise<Blob> {
         const response = await this.fetchRange(offset, size);
-
 
         return response.blob();
     }

@@ -38,6 +38,5 @@ export function getTokenLocation(result: DecompileResult, token: Token): TokenLo
     const line = sourceUpTo.match(/\n/g)!.length + 1;
     const column = sourceUpTo.length - sourceUpTo.lastIndexOf("\n");
 
-
     return { line, column, length: token.length };
 }

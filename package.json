@@ -15,7 +15,9 @@
     "test:e2e:debug": "playwright test --debug",
     "lint": "eslint src tests --ext .js,.ts,.jsx,.tsx",
     "lint:fix": "eslint src tests --ext .js,.ts,.jsx,.tsx --fix",
-    "format": "eslint src tests --ext .js,.ts,.jsx,.tsx --fix",
+    "format": "prettier --write \"src/**/*.{js,ts,jsx,tsx,json,css,md}\" \"tests/**/*.{js,ts,jsx,tsx}\" && eslint src tests --ext .js,.ts,.jsx,.tsx --fix",
+    "format:prettier": "prettier --write \"src/**/*.{js,ts,jsx,tsx,json,css,md}\" \"tests/**/*.{js,ts,jsx,tsx}\"",
+    "format:check": "prettier --check \"src/**/*.{js,ts,jsx,tsx,json,css,md}\" \"tests/**/*.{js,ts,jsx,tsx}\"",
     "check": "eslint src tests --ext .js,.ts,.jsx,.tsx"
   },
   "dependencies": {
@@ -45,6 +47,7 @@
     "@vitejs/plugin-react": "^5.0.4",
     "eslint": "^9.39.2",
     "globals": "^16.4.0",
+    "prettier": "^3.7.4",
     "typescript": "~5.9.3",
     "vite": "^7.1.7",
     "vite-plugin-comlink": "^5.3.0",

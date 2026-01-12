@@ -8,7 +8,6 @@ function getUsageClass(usage: UsageString): string {
     if (usage.startsWith("m:") || usage.startsWith("f:")) {
         const parts = usage.slice(2).split(":");
 
-
         return parts[0];
     }
 

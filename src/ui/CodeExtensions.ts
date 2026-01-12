@@ -44,8 +44,8 @@ export function jumpToToken(
 }
 
 export function createDefinitionProvider(
-    decompileResultRef: { current: DecompileResult | undefined; },
-    classListRef: { current: string[] | undefined; }
+    decompileResultRef: { current: DecompileResult | undefined },
+    classListRef: { current: string[] | undefined }
 ) {
     return {
         provideDefinition(model: editor.ITextModel, position: IPosition) {
@@ -87,9 +87,10 @@ export function createDefinitionProvider(
                             uri:
                                 "descriptor" in token
                                     ? Uri.parse(
-                                        `goto://class/${className}#${token.type}:${token.type === "method" ? token.descriptor : token.name
-                                        }`
-                                    )
+                                          `goto://class/${className}#${token.type}:${
+                                              token.type === "method" ? token.descriptor : token.name
+                                          }`
+                                      )
                                     : Uri.parse(`goto://class/${className}`),
                             range,
                         };
@@ -110,12 +111,9 @@ export function createDefinitionProvider(
     };
 }
 
-export function createEditorOpener(decompileResultRef: { current: DecompileResult | undefined; }) {
+export function createEditorOpener(decompileResultRef: { current: DecompileResult | undefined }) {
     return {
-        openCodeEditor: (
-            editor: editor.ICodeEditor,
-            resource: Uri,
-        ): boolean | Promise<boolean> => {
+        openCodeEditor: (editor: editor.ICodeEditor, resource: Uri): boolean | Promise<boolean> => {
             if (!resource.scheme.startsWith("goto")) {
                 return false;
             }
@@ -256,11 +254,8 @@ export function createFoldingRangeProvider(monaco: typeof Monaco) {
     }
 
     return {
-        provideFoldingRanges: (
-            model: editor.ITextModel,
-        ): languages.ProviderResult<languages.FoldingRange[]> => {
+        provideFoldingRanges: (model: editor.ITextModel): languages.ProviderResult<languages.FoldingRange[]> => {
             const lines = model.getLinesContent();
-
 
             return [...getImportFoldingRanges(lines), ...getBracketFoldingRanges(lines)];
         },

@@ -8,7 +8,6 @@ import { isEnum, isInterface } from "../../utils/Classfile";
 function getSimpleClassName(fullName: string): string {
     const i = fullName.lastIndexOf("/");
 
-
     return i === -1 ? fullName : fullName.substring(i + 1);
 }
 
@@ -49,7 +48,6 @@ function buildTreeData(root: ClassNode, selectedName: string): { nodes: TreeData
             if (a.expanded.length !== b.expanded.length) return b.expanded.length - a.expanded.length;
             const aName = getSimpleClassName(a.dataNode.key as string);
             const bName = getSimpleClassName(b.dataNode.key as string);
-
 
             return aName.localeCompare(bName);
         });

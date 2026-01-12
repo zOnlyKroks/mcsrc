@@ -109,7 +109,6 @@ async function decompileClass(className: string, jar: Jar, options: Options): Pr
                 if (file) {
                     const arrayBuffer = await file.bytes();
 
-
                     return new Uint8Array(arrayBuffer);
                 }
 
@@ -142,7 +141,7 @@ async function decompileClass(className: string, jar: Jar, options: Options): Pr
 
 function tokenCollector(tokens: Token[]): TokenCollector {
     return {
-        start: (_content: string): void => { },
+        start: (_content: string): void => {},
         visitClass: (start: number, length: number, declaration: boolean, name: string): void => {
             tokens.push({ type: "class", start, length, className: name, declaration });
         },
@@ -190,7 +189,7 @@ function tokenCollector(tokens: Token[]): TokenCollector {
         ): void => {
             tokens.push({ type: "local", start, length, className, declaration });
         },
-        end: (): void => { },
+        end: (): void => {},
     };
 }
 
@@ -256,7 +255,6 @@ async function getClassBytecode(className: string, jar: Jar): Promise<DecompileR
         }
 
         const bytecode = await getBytecode(classData);
-
 
         return { className, source: bytecode, tokens: [], language: "bytecode" };
     } catch (e) {

@@ -2,12 +2,7 @@ import type { editor } from "monaco-editor";
 import { type CancellationToken, type IDisposable, type languages } from "monaco-editor";
 import type { DecompileResult } from "../logic/Decompiler";
 import { type Token, getTokenLocation } from "../logic/Tokens";
-import {
-    activeJavadocToken,
-    getJavadocForToken,
-    javadocData,
-    refreshJavadocDataForClass,
-} from "./Javadoc";
+import { activeJavadocToken, getJavadocForToken, javadocData, refreshJavadocDataForClass } from "./Javadoc";
 
 import type * as MonacoType from "monaco-editor";
 
@@ -85,7 +80,7 @@ export function applyJavadocCodeExtensions(
 
             return {
                 lenses,
-                dispose: () => { },
+                dispose: () => {},
             };
         },
     });
@@ -127,7 +122,6 @@ function formatMarkdownAsHtml(md: string, token: Token): string {
     const depth = nestingLevel * 6;
 
     const indent = `${"&nbsp;".repeat(depth)}/// `;
-
 
     return md
         .split("\n")
