@@ -29,8 +29,8 @@ export function parseClassData(data: ClassDataString): ClassData {
 }
 
 export interface JarIndexWorker {
-    index(buffer: ArrayBuffer): Promise<void>;
-    getUsageSize(): number;
+    index(buffer: ArrayBufferLike): Promise<void>;
+    getUsageSize(): Promise<number>;
     getUsage(key: UsageKey): Promise<UsageString[]>;
     getClassData(): Promise<ClassDataString[]>;
     getBytecode(classData: ArrayBufferLike[]): Promise<string>;
@@ -96,7 +96,7 @@ export class JarIndex {
                                 const nextTask = taskQueue.pop();
 
                                 if (!nextTask) {
-                                    const indexed = worker.getUsageSize();
+                                    const indexed = await worker.getUsageSize();
 
                                     return indexed;
                                 }
