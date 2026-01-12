@@ -7,13 +7,59 @@ async function waitForDecompiledContent(page: Page, expectedText: string) {
         await expect(decompiling).toBeHidden();
     }).toPass({ timeout: 30000 });
 
+    // Wait for Monaco editor to be ready and have content
     await expect(async () => {
-        const editorContent = await page.evaluate(() => {
-            const monacoGlobal = (window as { monaco?: { editor: { getEditors: () => { getValue: () => string }[] } } })
-                .monaco;
-            const editors = monacoGlobal?.editor?.getEditors();
-            return editors?.[0]?.getValue() ?? "";
-        });
+        let editorContent = "";
+
+        try {
+            // Try Monaco API first
+            editorContent = await page.evaluate(() => {
+                const monacoGlobal = (window as { monaco?: { editor: { getEditors: () => { getValue: () => string }[] } } })
+                    .monaco;
+
+                // Check if Monaco is available
+                if (!monacoGlobal?.editor?.getEditors) {
+                    throw new Error("Monaco editor not available");
+                }
+
+                const editors = monacoGlobal.editor.getEditors();
+
+                // Check if editors exist
+                if (!editors || editors.length === 0) {
+                    throw new Error("No Monaco editors found");
+                }
+
+                const content = editors[0].getValue();
+
+                // Check if editor has content
+                if (!content || content.trim().length === 0) {
+                    throw new Error("Editor content is empty");
+                }
+
+                return content;
+            });
+        } catch {
+            // Fallback: extract text from view lines (excluding line numbers)
+            const viewLines = page.locator(".monaco-editor .view-lines .view-line");
+            const linesCount = await viewLines.count();
+
+            if (linesCount === 0) {
+                throw new Error("No Monaco editor content found");
+            }
+
+            const lines = [];
+            for (let i = 0; i < linesCount; i++) {
+                const lineText = await viewLines.nth(i).textContent();
+                if (lineText) {
+                    lines.push(lineText);
+                }
+            }
+            editorContent = lines.join('\n');
+        }
+
+        if (!editorContent || editorContent.trim().length === 0) {
+            throw new Error("Editor content is empty");
+        }
 
         expect(editorContent).toContain(expectedText);
     }).toPass({ timeout: 30000 });
