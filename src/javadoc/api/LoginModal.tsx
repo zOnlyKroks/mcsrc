@@ -1,20 +1,21 @@
 import { GithubOutlined } from "@ant-design/icons";
 import { Button, Modal, message } from "antd";
 import { useState } from "react";
+import { of } from "rxjs";
 import { agreedEula } from "../../logic/Settings";
 import { IS_JAVADOC_EDITOR } from "../../site";
 import { useObservable } from "../../utils/UseObservable";
 import { javadocApi } from "./JavadocApi";
 
 const LoginModal = () => {
-    if (!IS_JAVADOC_EDITOR) {
-        return <></>;
-    }
-
-    const needsToLogin = useObservable(javadocApi.needsToLogin);
+    const needsToLogin = useObservable(javadocApi?.needsToLogin ?? of(false));
     const accepted = useObservable(agreedEula.observable);
     const [loading, setLoading] = useState(false);
     const [messageApi] = message.useMessage();
+
+    if (!IS_JAVADOC_EDITOR) {
+        return <></>;
+    }
 
     const handleGithubLogin = async () => {
         try {
