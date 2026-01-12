@@ -7,10 +7,16 @@ async function waitForDecompiledContent(page: Page, expectedText: string) {
         await expect(decompiling).toBeHidden();
     }).toPass({ timeout: 30000 });
 
-    // Use a more specific selector to get only the code content, not line numbers
-    const editor = page.locator(".monaco-editor .view-lines");
+    await expect(async () => {
+        const editorContent = await page.evaluate(() => {
+            const monacoGlobal = (window as { monaco?: { editor: { getEditors: () => { getValue: () => string }[] } } })
+                .monaco;
+            const editors = monacoGlobal?.editor?.getEditors();
+            return editors?.[0]?.getValue() ?? "";
+        });
 
-    await expect(editor).toContainText(expectedText, { timeout: 30000 });
+        expect(editorContent).toContain(expectedText);
+    }).toPass({ timeout: 30000 });
 }
 
 test.describe("mcsrc", () => {
@@ -57,28 +63,22 @@ test.describe("mcsrc", () => {
 
         await expect(editor).toBeVisible();
 
-        // First click to select starting line
         const lineNumbers = editor.locator(".line-numbers");
 
         await lineNumbers.first().click();
 
-        // Wait for URL to update
         await page.waitForTimeout(500);
         const urlAfterFirstClick = page.url();
 
         expect(urlAfterFirstClick).toMatch(/#L\d+$/);
 
-        // Shift-click on a different line to create range
         await lineNumbers.nth(5).click({ modifiers: ["Shift"] });
 
-        // Wait for URL to update
         await page.waitForTimeout(500);
 
-        // Check that URL now contains a line range
         expect(page.url()).toMatch(/#L\d+-\d+$/);
         expect(page.url()).not.toEqual(urlAfterFirstClick);
 
-        // Check that lines are highlighted
         const highlightedLine = editor.locator(".highlighted-line");
 
         await expect(highlightedLine.first()).toBeVisible({ timeout: 2000 });
