@@ -1,33 +1,31 @@
-import { Table, Tag, Input, Button, Flex, theme, Checkbox, Tooltip } from 'antd';
-import DiffVersionSelection from './DiffVersionSelection';
-import { getDiffChanges, type ChangeState, hideUnchangedSizes } from '../../logic/Diff';
-import { BehaviorSubject, map, combineLatest } from 'rxjs';
-import { useObservable } from '../../utils/UseObservable';
-import type { SearchProps } from 'antd/es/input';
-import { selectedFile, setSelectedFile } from '../../logic/State';
-import { diffView } from "../../logic/Diff";
+import { Button, Checkbox, Flex, Input, Table, Tag, Tooltip, theme } from "antd";
+import type { SearchProps } from "antd/es/input";
+import { useEffect } from "react";
+import { BehaviorSubject, combineLatest, map } from "rxjs";
 import { isDecompiling } from "../../logic/Decompiler.ts";
-import { useEffect } from 'react';
+import { type ChangeState, getDiffChanges, hideUnchangedSizes } from "../../logic/Diff";
+import { diffView } from "../../logic/Diff";
+import { selectedFile, setSelectedFile } from "../../logic/State";
+import { useObservable } from "../../utils/UseObservable";
+import DiffVersionSelection from "./DiffVersionSelection";
 
 const statusColors: Record<ChangeState, string> = {
-    modified: 'gold',
-    added: 'green',
-    deleted: 'red',
+    modified: "gold",
+    added: "green",
+    deleted: "red",
 };
 
 const columns = [
     {
-        title: 'File',
-        dataIndex: 'file',
-        key: 'file',
+        title: "File",
+        dataIndex: "file",
+        key: "file",
     },
     {
-        title: 'Status',
-        dataIndex: 'status',
-        key: 'status',
-        render: (status: ChangeState) => (
-            <Tag color={statusColors[status] || 'default'}>{status.toUpperCase()}</Tag>
-        ),
+        title: "Status",
+        dataIndex: "status",
+        key: "status",
+        render: (status: ChangeState) => <Tag color={statusColors[status] || "default"}>{status.toUpperCase()}</Tag>,
     },
 ];
 
@@ -35,8 +33,9 @@ const searchQuery = new BehaviorSubject("");
 
 const entries = combineLatest([getDiffChanges(), searchQuery]).pipe(
     map(([changesMap, query]) => {
-        const entriesArray: { key: string; file: string; status: string; }[] = [];
+        const entriesArray: { key: string; file: string; status: string }[] = [];
         const lowerQuery = query.toLowerCase();
+
         changesMap.forEach((status, file) => {
             if (!query || file.toLowerCase().includes(lowerQuery)) {
                 entriesArray.push({
@@ -46,6 +45,7 @@ const entries = combineLatest([getDiffChanges(), searchQuery]).pipe(
                 });
             }
         });
+
         return entriesArray;
     })
 );
@@ -57,7 +57,7 @@ const DiffFileList = () => {
     const hideUnchanged = useObservable(hideUnchangedSizes) || false;
     const { token } = theme.useToken();
 
-    const onChange: SearchProps['onChange'] = (e) => {
+    const onChange: SearchProps["onChange"] = (e) => {
         searchQuery.next(e.target.value);
     };
 
@@ -76,23 +76,27 @@ const DiffFileList = () => {
     }, [dataSource.length, hideUnchanged]);
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', height: '100%', marginLeft: 8, marginRight: 8, overflow: 'hidden' }}>
+        <div
+            style={{
+                display: "flex",
+                flexDirection: "column",
+                height: "100%",
+                marginLeft: 8,
+                marginRight: 8,
+                overflow: "hidden",
+            }}
+        >
             <div
                 style={{
-                    position: 'sticky',
+                    position: "sticky",
                     top: 0,
                     zIndex: 10,
                     paddingBottom: 12,
                     paddingTop: 12,
-                    backgroundColor: token.colorBgContainer
+                    backgroundColor: token.colorBgContainer,
                 }}
             >
-                <Input.Search
-                    placeholder="Search classes"
-                    allowClear
-                    onChange={onChange}
-                    style={{ width: 220 }}
-                />
+                <Input.Search placeholder="Search classes" allowClear onChange={onChange} style={{ width: 220 }} />
                 <Tooltip title="Hide modified classes that have the same uncompressed size. This is useful for versions where the compiler version has changed but the code hasn't.">
                     <Checkbox
                         checked={hideUnchanged}
@@ -106,10 +110,10 @@ const DiffFileList = () => {
                     gap={8}
                     align="center"
                     style={{
-                        position: 'absolute',
-                        left: '50%',
+                        position: "absolute",
+                        left: "50%",
                         top: 12,
-                        transform: 'translateX(-50%)',
+                        transform: "translateX(-50%)",
                     }}
                 >
                     <DiffVersionSelection />
@@ -119,9 +123,9 @@ const DiffFileList = () => {
                     variant={"outlined"}
                     onClick={handleExitDiff}
                     style={{
-                        position: 'absolute',
+                        position: "absolute",
                         top: 12,
-                        right: 0
+                        right: 0,
                     }}
                 >
                     Exit Diff
@@ -130,7 +134,7 @@ const DiffFileList = () => {
             <div
                 style={{
                     flex: 1,
-                    overflowY: 'auto'
+                    overflowY: "auto",
                 }}
             >
                 <Table
@@ -140,19 +144,17 @@ const DiffFileList = () => {
                     size="small"
                     bordered
                     showHeader={false}
-                    rowClassName={(record) =>
-                        currentFile === record.file + ".class" ? 'ant-table-row-selected' : ''
-                    }
+                    rowClassName={(record) => (currentFile === record.file + ".class" ? "ant-table-row-selected" : "")}
                     onRow={(record) => ({
                         onClick: () => {
                             if (loading) return;
                             if (currentFile === record.file + ".class") return;
 
                             setSelectedFile(record.file + ".class");
-                        }
+                        },
                     })}
                     style={{
-                        cursor: loading ? 'not-allowed' : 'pointer'
+                        cursor: loading ? "not-allowed" : "pointer",
                     }}
                 />
             </div>

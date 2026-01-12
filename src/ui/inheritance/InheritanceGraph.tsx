@@ -1,18 +1,20 @@
-import { ReactFlow, type Node, type Edge, Background, useReactFlow, ReactFlowProvider } from "@xyflow/react";
+import { Background, type Edge, type Node, ReactFlow, ReactFlowProvider, useReactFlow } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
-import { ClassNode, selectedInheritanceClassName } from "../../logic/Inheritance";
-import { isInterface, isAbstract } from "../../utils/Classfile";
-import { useMemo, useCallback, useEffect } from "react";
 import dagre from "dagre";
+import { useCallback, useEffect, useMemo } from "react";
+import { type ClassNode, selectedInheritanceClassName } from "../../logic/Inheritance";
 import { openTab } from "../../logic/Tabs";
+import { isAbstract, isInterface } from "../../utils/Classfile";
 
-function buildGraphData(classNode: ClassNode): { nodes: Node[]; edges: Edge[]; } {
+function buildGraphData(classNode: ClassNode): { nodes: Node[]; edges: Edge[] } {
     const nodes: Node[] = [];
     const edges: Edge[] = [];
     const visited = new Set<string>();
 
     const getSimpleClassName = (fullName: string) => {
-        const i = fullName.lastIndexOf('/');
+        const i = fullName.lastIndexOf("/");
+
+
         return i === -1 ? fullName : fullName.substring(i + 1);
     };
 
@@ -130,12 +132,13 @@ function buildGraphData(classNode: ClassNode): { nodes: Node[]; edges: Edge[]; }
 
     // Use dagre to calculate positions
     const dagreGraph = new dagre.graphlib.Graph();
+
     dagreGraph.setDefaultEdgeLabel(() => ({}));
     dagreGraph.setGraph({
-        rankdir: 'TB', // Top to Bottom
+        rankdir: "TB", // Top to Bottom
         nodesep: 100,
         ranksep: 100,
-        edgesep: 50
+        edgesep: 50,
     });
 
     // Add nodes to dagre graph
@@ -154,6 +157,8 @@ function buildGraphData(classNode: ClassNode): { nodes: Node[]; edges: Edge[]; }
     // Apply calculated positions to nodes
     const layoutedNodes = nodes.map((node) => {
         const nodeWithPosition = dagreGraph.node(node.id);
+
+
         return {
             ...node,
             position: {
@@ -164,12 +169,14 @@ function buildGraphData(classNode: ClassNode): { nodes: Node[]; edges: Edge[]; }
     });
 
     console.log(`Graph built: ${layoutedNodes.length} nodes, ${edges.length} edges`);
+
     return { nodes: layoutedNodes, edges };
 }
 
-const InheritanceGraphInner = ({ data }: { data: ClassNode; }) => {
+const InheritanceGraphInner = ({ data }: { data: ClassNode }) => {
     const { nodes, edges } = useMemo(() => {
         if (!data) return { nodes: [], edges: [] };
+
         return buildGraphData(data);
     }, [data]);
 
@@ -180,38 +187,32 @@ const InheritanceGraphInner = ({ data }: { data: ClassNode; }) => {
 
         const timer = setTimeout(() => {
             const selectedNode = getNode(data.name);
+
             if (selectedNode) {
-                setCenter(
-                    selectedNode.position.x + 100,
-                    selectedNode.position.y + 25,
-                    { zoom: 1, duration: 300 }
-                );
+                setCenter(selectedNode.position.x + 100, selectedNode.position.y + 25, { zoom: 1, duration: 300 });
             }
         }, 0);
+
+
         return () => clearTimeout(timer);
     }, [data, setCenter, getNode]);
 
     const onNodeClick = useCallback((_event: React.MouseEvent, node: Node) => {
         // Convert internal class name format (e.g., "net/minecraft/ChatFormatting") to file path
         const filePath = node.id + ".class";
+
         openTab(filePath);
         selectedInheritanceClassName.next(null);
     }, []);
 
     return (
-        <ReactFlow
-            nodes={nodes}
-            edges={edges}
-            fitView
-            proOptions={{ hideAttribution: true }}
-            onNodeClick={onNodeClick}
-        >
+        <ReactFlow nodes={nodes} edges={edges} fitView proOptions={{ hideAttribution: true }} onNodeClick={onNodeClick}>
             <Background />
         </ReactFlow>
     );
 };
 
-const InheritanceGraph = ({ data }: { data: ClassNode; }) => {
+const InheritanceGraph = ({ data }: { data: ClassNode }) => {
     return (
         <div style={{ width: "100%", height: "80vh" }}>
             <ReactFlowProvider>

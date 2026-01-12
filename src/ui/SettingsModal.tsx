@@ -1,10 +1,18 @@
-import { Button, Modal, type CheckboxProps, Form, Tooltip } from "antd";
-import { SettingOutlined } from '@ant-design/icons';
-import { Checkbox } from 'antd';
-import { useObservable } from "../utils/UseObservable";
-import { BooleanSetting, enableTabs, displayLambdas, focusSearch, KeybindSetting, type KeybindValue, bytecode } from "../logic/Settings";
-import { capturingKeybind, rawKeydownEvent } from "../logic/Keybinds";
+import { SettingOutlined } from "@ant-design/icons";
+import { Button, type CheckboxProps, Form, Modal, Tooltip } from "antd";
+import { Checkbox } from "antd";
 import { BehaviorSubject } from "rxjs";
+import { capturingKeybind, rawKeydownEvent } from "../logic/Keybinds";
+import {
+    type BooleanSetting,
+    type KeybindSetting,
+    type KeybindValue,
+    bytecode,
+    displayLambdas,
+    enableTabs,
+    focusSearch,
+} from "../logic/Settings";
+import { useObservable } from "../utils/UseObservable";
 
 export const settingsModalOpen = new BehaviorSubject<boolean>(false);
 
@@ -22,16 +30,21 @@ const SettingsModal = () => {
     const bytecodeValue = useObservable(bytecode.observable);
 
     return (
-        <Modal
-            title="Settings"
-            open={isModalOpen}
-            onCancel={() => settingsModalOpen.next(false)}
-            footer={null}
-        >
+        <Modal title="Settings" open={isModalOpen} onCancel={() => settingsModalOpen.next(false)} footer={null}>
             <Form layout="horizontal" labelCol={{ span: 8 }} wrapperCol={{ span: 16 }}>
                 <BooleanToggle setting={enableTabs} title={"Enable Tabs"} />
-                <BooleanToggle setting={displayLambdas} title={"Lambda Names"} tooltip="Display lambda names as inline comments. Does not support permalinking." disabled={bytecodeValue} />
-                <BooleanToggle setting={bytecode} title={"Show Bytecode"} tooltip="Show bytecode instructions alongside decompiled source. Does not support permalinking." disabled={displayLambdasValue} />
+                <BooleanToggle
+                    setting={displayLambdas}
+                    title={"Lambda Names"}
+                    tooltip="Display lambda names as inline comments. Does not support permalinking."
+                    disabled={bytecodeValue}
+                />
+                <BooleanToggle
+                    setting={bytecode}
+                    title={"Show Bytecode"}
+                    tooltip="Show bytecode instructions alongside decompiled source. Does not support permalinking."
+                    disabled={displayLambdasValue}
+                />
                 <KeybindControl setting={focusSearch} title={"Focus Search"} />
             </Form>
         </Modal>
@@ -47,17 +60,13 @@ interface BooleanToggleProps {
 
 const BooleanToggle: React.FC<BooleanToggleProps> = ({ setting, title, tooltip, disabled }) => {
     const value = useObservable(setting.observable);
-    const onChange: CheckboxProps['onChange'] = (e) => {
+    const onChange: CheckboxProps["onChange"] = (e) => {
         setting.value = e.target.checked;
     };
 
     const checkbox = <Checkbox checked={value} onChange={onChange} disabled={disabled} />;
 
-    return (
-        <Form.Item label={title}>
-            {tooltip ? <Tooltip title={tooltip}>{checkbox}</Tooltip> : checkbox}
-        </Form.Item>
-    );
+    return <Form.Item label={title}>{tooltip ? <Tooltip title={tooltip}>{checkbox}</Tooltip> : checkbox}</Form.Item>;
 };
 
 interface KeybindProps {
@@ -75,7 +84,8 @@ const KeybindControl: React.FC<KeybindProps> = ({ setting, title }) => {
             event.preventDefault();
 
             // Only capture if a non-modifier key is pressed
-            const modifierKeys = ['Control', 'Alt', 'Shift', 'Meta'];
+            const modifierKeys = ["Control", "Alt", "Shift", "Meta"];
+
             if (!modifierKeys.includes(event.key)) {
                 setting.setFromEvent(event);
                 capturingKeybind.next(false);
@@ -85,26 +95,26 @@ const KeybindControl: React.FC<KeybindProps> = ({ setting, title }) => {
     };
 
     const formatKeybind = (keybind: KeybindValue | undefined): string => {
-        if (!keybind) return 'Not set';
-        return keybind.split('+').map(k => {
-            if (k == ' ') return '<space>';
-            const key = k.trim();
-            return key.charAt(0).toUpperCase() + key.slice(1);
-        }).join('+');
+        if (!keybind) return "Not set";
+
+        return keybind
+            .split("+")
+            .map((k) => {
+                if (k == " ") return "<space>";
+                const key = k.trim();
+
+
+                return key.charAt(0).toUpperCase() + key.slice(1);
+            })
+            .join("+");
     };
 
     return (
         <Form.Item label={title}>
-            <Button
-                onClick={startCapture}
-                type={capturing ? 'primary' : 'default'}
-            >
-                {capturing ? 'Press keys...' : formatKeybind(value)}
+            <Button onClick={startCapture} type={capturing ? "primary" : "default"}>
+                {capturing ? "Press keys..." : formatKeybind(value)}
             </Button>
-            <Button
-                onClick={() => setting.reset()}
-                style={{ marginLeft: '8px' }}
-            >
+            <Button onClick={() => setting.reset()} style={{ marginLeft: "8px" }}>
                 Reset
             </Button>
         </Form.Item>

@@ -1,16 +1,16 @@
+import { ArrowLeftOutlined } from "@ant-design/icons";
 import { Button, Card, Divider, Input } from "antd";
-import Header from "./Header";
-import FileList from "./FileList";
 import type { InputRef, SearchProps } from "antd/es/input";
-import { useObservable } from "../utils/UseObservable";
-import { isSearching, searchQuery } from "../logic/JarFile";
-import SearchResults from "./SearchResults";
-import UsageResults from "./UsageResults";
+import { useEffect, useRef } from "react";
 import { isThin } from "../logic/Browser";
 import { formatUsageQuery, isViewingUsages, usageQuery } from "../logic/FindUsages";
-import { ArrowLeftOutlined } from "@ant-design/icons";
+import { isSearching, searchQuery } from "../logic/JarFile";
 import { focusSearchEvent } from "../logic/Keybinds";
-import { useEffect, useRef } from "react";
+import { useObservable } from "../utils/UseObservable";
+import FileList from "./FileList";
+import Header from "./Header";
+import SearchResults from "./SearchResults";
+import UsageResults from "./UsageResults";
 
 const { Search } = Input;
 
@@ -34,8 +34,7 @@ const SideBar = () => {
         }
     }, [focusSearch, showUsage]);
 
-    const onChange: SearchProps['onChange'] = (e) => {
-
+    const onChange: SearchProps["onChange"] = (e) => {
         searchQuery.next(e.target.value);
     };
 

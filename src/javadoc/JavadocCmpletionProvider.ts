@@ -1,6 +1,6 @@
-import { editor, languages, Position, Token, type CancellationToken } from 'monaco-editor';
-import type { DecompileResult } from '../logic/Decompiler';
-import type { MemberToken } from '../logic/Tokens';
+import { type CancellationToken, type Position, type editor, languages } from "monaco-editor";
+import type { DecompileResult } from "../logic/Decompiler";
+import type { MemberToken } from "../logic/Tokens";
 
 export class JavdocCompletionProvider implements languages.CompletionItemProvider {
     readonly decompileResult: DecompileResult;
@@ -9,9 +9,14 @@ export class JavdocCompletionProvider implements languages.CompletionItemProvide
         this.decompileResult = decompileResult;
     }
 
-    triggerCharacters: string[] = ['[', '#'];
+    triggerCharacters: string[] = ["[", "#"];
 
-    provideCompletionItems(model: editor.ITextModel, position: Position, context: languages.CompletionContext, token: CancellationToken): languages.ProviderResult<languages.CompletionList> {
+    provideCompletionItems(
+        model: editor.ITextModel,
+        position: Position,
+        _context: languages.CompletionContext,
+        _token: CancellationToken
+    ): languages.ProviderResult<languages.CompletionList> {
         if (!this.isCreatingLink(model, position)) {
             return { suggestions: [] };
         }
@@ -20,16 +25,19 @@ export class JavdocCompletionProvider implements languages.CompletionItemProvide
             startLineNumber: position.lineNumber,
             startColumn: position.column,
             endLineNumber: position.lineNumber,
-            endColumn: position.column
+            endColumn: position.column,
         };
 
         if (this.isCreatingMemberLink(model, position)) {
-            const suggestions: languages.CompletionItem[] = this.getMembers().map(token => {
+            const suggestions: languages.CompletionItem[] = this.getMembers().map((token) => {
                 return {
                     label: token.name,
-                    kind: token.type === 'method' ? languages.CompletionItemKind.Method : languages.CompletionItemKind.Field,
+                    kind:
+                        token.type === "method"
+                            ? languages.CompletionItemKind.Method
+                            : languages.CompletionItemKind.Field,
                     insertText: token.name,
-                    range
+                    range,
                 };
             });
 
@@ -38,29 +46,30 @@ export class JavdocCompletionProvider implements languages.CompletionItemProvide
 
         const imports = this.getImportedClasses();
 
-        const suggestions: languages.CompletionItem[] = imports.map(importPath => {
-            const className = importPath.split('.').pop() || importPath;
+        const suggestions: languages.CompletionItem[] = imports.map((importPath) => {
+            const className = importPath.split(".").pop() || importPath;
 
             return {
                 label: className,
                 kind: languages.CompletionItemKind.Reference,
                 insertText: className,
                 detail: importPath,
-                range
+                range,
             };
         });
 
         return { suggestions };
     }
 
-    isCreatingLink(model: editor.ITextModel, position: Position): boolean { // Check if cursor is within [] characters
+    isCreatingLink(model: editor.ITextModel, position: Position): boolean {
+        // Check if cursor is within [] characters
         const lineContent = model.getLineContent(position.lineNumber);
         const textBeforeCursor = lineContent.substring(0, position.column - 1);
         const textAfterCursor = lineContent.substring(position.column - 1);
 
         // Find the last '[' before cursor and first ']' after cursor
-        const lastOpenBracket = textBeforeCursor.lastIndexOf('[');
-        const firstCloseBracket = textAfterCursor.indexOf(']');
+        const lastOpenBracket = textBeforeCursor.lastIndexOf("[");
+        const firstCloseBracket = textAfterCursor.indexOf("]");
 
         // Only provide completions if we're inside brackets
         return lastOpenBracket !== -1 && firstCloseBracket !== -1;
@@ -69,9 +78,11 @@ export class JavdocCompletionProvider implements languages.CompletionItemProvide
     isCreatingMemberLink(model: editor.ITextModel, position: Position): boolean {
         const lineContent = model.getLineContent(position.lineNumber);
         const textBeforeCursor = lineContent.substring(0, position.column - 1);
-        const lastOpenBracket = textBeforeCursor.lastIndexOf('[');
+        const lastOpenBracket = textBeforeCursor.lastIndexOf("[");
         const textAfterBracket = textBeforeCursor.substring(lastOpenBracket + 1);
-        return textAfterBracket.startsWith('#');
+
+
+        return textAfterBracket.startsWith("#");
     }
 
     getImportedClasses(): string[] {
@@ -80,14 +91,16 @@ export class JavdocCompletionProvider implements languages.CompletionItemProvide
 
         const importRegex = /^\s*import\s+(?!static\b)([^\s;]+)\s*;/gm;
 
-        let match = null;
-        while ((match = importRegex.exec(source)) !== null) {
+        let match = importRegex.exec(source);
+
+        while (match !== null) {
             const importPath = match[1];
-            if (importPath.endsWith('*')) {
-                continue;
+
+            if (!importPath.endsWith("*")) {
+                importedClasses.push(importPath);
             }
 
-            importedClasses.push(importPath);
+            match = importRegex.exec(source);
         }
 
         return importedClasses;
@@ -98,7 +111,7 @@ export class JavdocCompletionProvider implements languages.CompletionItemProvide
         const members: MemberToken[] = [];
 
         for (const token of tokens) {
-            if (token.declaration && (token.type == 'method' || token.type == 'field')) {
+            if (token.declaration && (token.type === "method" || token.type === "field")) {
                 members.push(token);
             }
         }

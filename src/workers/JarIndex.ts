@@ -1,5 +1,5 @@
 import { BehaviorSubject, distinctUntilChanged, map, shareReplay } from "rxjs";
-import { minecraftJar, type MinecraftJar } from "../logic/MinecraftApi";
+import { type MinecraftJar, minecraftJar } from "../logic/MinecraftApi";
 import type { ClassDataString } from "./JarIndexWorker";
 
 export type Class = string;
@@ -7,10 +7,7 @@ export type Method = `${string}:${string}:${string}`;
 export type Field = `${string}:${string}:${string}`;
 export type UsageKey = Class | Method | Field;
 
-export type UsageString =
-    | `c:${Class}`
-    | `m:${Method}`
-    | `f:${Field}`;
+export type UsageString = `c:${Class}` | `m:${Method}` | `f:${Field}`;
 
 export interface ClassData {
     className: string;
@@ -21,11 +18,13 @@ export interface ClassData {
 
 export function parseClassData(data: ClassDataString): ClassData {
     const [className, superName, accessFlagsStr, interfacesStr] = data.split("|");
+
+
     return {
         className,
         superName,
-        accessFlags: parseInt(accessFlagsStr, 10),
-        interfaces: interfacesStr ? interfacesStr.split(",").filter(i => i.length > 0) : []
+        accessFlags: Number.parseInt(accessFlagsStr, 10),
+        interfaces: interfacesStr ? interfacesStr.split(",").filter((i) => i.length > 0) : [],
     };
 }
 
@@ -36,7 +35,7 @@ export const indexProgress = new BehaviorSubject<number>(-1);
 
 export const jarIndex = minecraftJar.pipe(
     distinctUntilChanged(),
-    map(jar => new JarIndex(jar)),
+    map((jar) => new JarIndex(jar)),
     shareReplay({ bufferSize: 1, refCount: false })
 );
 
@@ -51,6 +50,7 @@ export class JarIndex {
         this.minecraftJar = minecraftJar;
 
         const threads = navigator.hardwareConcurrency || 4;
+
         this.workers = Array.from({ length: threads }, () => createWrorker());
 
         console.log(`Created JarIndex with ${threads} workers`);
@@ -60,6 +60,7 @@ export class JarIndex {
         if (!this.indexPromise) {
             this.indexPromise = this.performIndexing();
         }
+
         return this.indexPromise;
     }
 
@@ -71,43 +72,47 @@ export class JarIndex {
             console.log(`Indexing minecraft jar using ${this.workers.length} workers`);
 
             const jar = this.minecraftJar.jar;
-            const classNames = Object.keys(jar.entries)
-                .filter(name => name.endsWith(".class"));
+            const classNames = Object.keys(jar.entries).filter((name) => name.endsWith(".class"));
 
-            let promises: Promise<number>[] = [];
+            const promises: Promise<number>[] = [];
 
-            let taskQueue = [...classNames];
+            const taskQueue = [...classNames];
             let completed = 0;
             let lastProgressUpdate = 0;
 
             for (let i = 0; i < this.workers.length; i++) {
                 const worker = this.workers[i];
 
-                promises.push(new Promise(async (resolve) => {
-                    while (true) {
-                        const nextTask = taskQueue.pop();
+                promises.push(
+                    new Promise((resolve, reject) => {
+                        (async () => {
+                            while (true) {
+                                const nextTask = taskQueue.pop();
 
-                        if (!nextTask) {
-                            const indexed = worker.getUsageSize();
-                            resolve(indexed);
-                            return;
-                        }
+                                if (!nextTask) {
+                                    const indexed = worker.getUsageSize();
 
-                        const entry = jar.entries[nextTask];
-                        const data = await entry.bytes();
+                                    return indexed;
+                                }
 
-                        await worker.index(data.buffer);
+                                const entry = jar.entries[nextTask];
+                                const data = await entry.bytes();
 
-                        completed++;
-                        
-                        // Only update progress every 1% or every 50 classes, whichever is smaller
-                        const progressThreshold = Math.max(1, Math.floor(classNames.length / 100));
-                        if (completed - lastProgressUpdate >= progressThreshold) {
-                            lastProgressUpdate = completed;
-                            indexProgress.next(Math.round((completed / classNames.length) * 100));
-                        }
-                    }
-                }));
+                                await worker.index(data.buffer);
+
+                                completed++;
+
+                                // Only update progress every 1% or every 50 classes, whichever is smaller
+                                const progressThreshold = Math.max(1, Math.floor(classNames.length / 100));
+
+                                if (completed - lastProgressUpdate >= progressThreshold) {
+                                    lastProgressUpdate = completed;
+                                    indexProgress.next(Math.round((completed / classNames.length) * 100));
+                                }
+                            }
+                        })().then((indexed) => resolve(indexed)).catch(reject);
+                    })
+                );
             }
 
             const indexedCounts = await Promise.all(promises);
@@ -115,6 +120,7 @@ export class JarIndex {
 
             const endTime = performance.now();
             const duration = ((endTime - startTime) / 1000).toFixed(2);
+
             console.log(`Indexing completed in ${duration} seconds. Total indexed: ${totalIndexed}`);
             indexProgress.next(-1);
         } catch (error) {
@@ -127,13 +133,13 @@ export class JarIndex {
     async getUsage(key: UsageKey): Promise<UsageString[]> {
         await this.indexJar();
 
-        let results: Promise<UsageString[]>[] = [];
+        const results: Promise<UsageString[]>[] = [];
 
         for (const worker of this.workers) {
             results.push(worker.getUsage(key));
         }
 
-        return Promise.all(results).then(arrays => arrays.flat());
+        return Promise.all(results).then((arrays) => arrays.flat());
     }
 
     async getClassData(): Promise<ClassData[]> {
@@ -143,15 +149,16 @@ export class JarIndex {
 
         await this.indexJar();
 
-        let results: Promise<ClassDataString[]>[] = [];
+        const results: Promise<ClassDataString[]>[] = [];
 
         for (const worker of this.workers) {
             results.push(worker.getClassData());
         }
 
-        const classDataStrings = await Promise.all(results).then(arrays => arrays.flat());
+        const classDataStrings = await Promise.all(results).then((arrays) => arrays.flat());
+
         this.classDataCache = classDataStrings.map(parseClassData);
-        
+
         return this.classDataCache;
     }
 }
@@ -162,13 +169,10 @@ export async function getBytecode(classData: ArrayBufferLike[]): Promise<string>
     if (!bytecodeWorker) {
         bytecodeWorker = createWrorker();
     }
+
     return bytecodeWorker.getBytecode(classData);
 }
 
 function createWrorker() {
-    return new ComlinkWorker<JarIndexWorker>(
-        new URL("./JarIndexWorker", import.meta.url),
-        {
-        }
-    );
+    return new ComlinkWorker<JarIndexWorker>(new URL("./JarIndexWorker", import.meta.url), {});
 }

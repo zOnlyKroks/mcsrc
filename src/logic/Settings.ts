@@ -1,6 +1,6 @@
-import { BehaviorSubject, combineLatest, map, Observable, switchMap } from "rxjs";
+import { BehaviorSubject, type Observable, combineLatest, map } from "rxjs";
 
-export type ModifierKey = 'Ctrl' | 'Alt' | 'Shift';
+export type ModifierKey = "Ctrl" | "Alt" | "Shift";
 export type Key = string;
 export type KeybindValue =
     | Key
@@ -9,12 +9,12 @@ export type KeybindValue =
     | `${ModifierKey}+${ModifierKey}+${ModifierKey}+${Key}`;
 
 export class BooleanSetting {
-    private key: string;
-    private subject: BehaviorSubject<boolean>;
+    private readonly key: string;
+    private readonly subject: BehaviorSubject<boolean>;
 
     constructor(key: string, defaultValue: boolean) {
         const stored = localStorage.getItem(`setting_${key}`);
-        const initialValue = stored !== null ? stored === 'true' : defaultValue;
+        const initialValue = stored !== null ? stored === "true" : defaultValue;
 
         this.key = key;
         this.subject = new BehaviorSubject<boolean>(initialValue);
@@ -68,37 +68,39 @@ export class KeybindSetting {
     setFromEvent(event: KeyboardEvent): void {
         const parts: string[] = [];
 
-        if (event.ctrlKey) parts.push('Ctrl');
-        if (event.altKey) parts.push('Alt');
-        if (event.shiftKey) parts.push('Shift');
-        if (event.metaKey) parts.push('Cmd');
+        if (event.ctrlKey) parts.push("Ctrl");
+        if (event.altKey) parts.push("Alt");
+        if (event.shiftKey) parts.push("Shift");
+        if (event.metaKey) parts.push("Cmd");
 
-        const modifierKeys = ['Control', 'Alt', 'Shift', 'Meta'];
+        const modifierKeys = ["Control", "Alt", "Shift", "Meta"];
+
         if (!modifierKeys.includes(event.key)) {
             parts.push(event.key);
         }
 
         if (parts.length > 0) {
-            this.value = parts.join('+');
+            this.value = parts.join("+");
         }
     }
 
     parse(): { ctrl: boolean; alt: boolean; shift: boolean; cmd: boolean; key: string | null; } {
-        const keys = this.value.split('+').map(k => k.toLowerCase());
-        const modifierKeys = ['ctrl', 'alt', 'shift', 'cmd'];
-        const mainKey = keys.find(k => !modifierKeys.includes(k)) ?? null;
+        const keys = this.value.split("+").map((k) => k.toLowerCase());
+        const modifierKeys = ["ctrl", "alt", "shift", "cmd"];
+        const mainKey = keys.find((k) => !modifierKeys.includes(k)) ?? null;
 
         return {
-            ctrl: keys.includes('ctrl'),
-            alt: keys.includes('alt'),
-            shift: keys.includes('shift'),
-            cmd: keys.includes('cmd'),
-            key: mainKey
+            ctrl: keys.includes("ctrl"),
+            alt: keys.includes("alt"),
+            shift: keys.includes("shift"),
+            cmd: keys.includes("cmd"),
+            key: mainKey,
         };
     }
 
     matches(event: KeyboardEvent): boolean {
         const parsed = this.parse();
+
         if (event.ctrlKey !== parsed.ctrl) return false;
         if (event.altKey !== parsed.alt) return false;
         if (event.shiftKey !== parsed.shift) return false;
@@ -110,20 +112,15 @@ export class KeybindSetting {
     }
 }
 
-export const agreedEula = new BooleanSetting('eula', false);
-export const enableTabs = new BooleanSetting('enable_tabs', true);
-export const displayLambdas = new BooleanSetting('display_lambdas', false);
-export const bytecode = new BooleanSetting('bytecode', false);
-export const focusSearch = new KeybindSetting('focus_search', 'Ctrl+ ');
+export const agreedEula = new BooleanSetting("eula", false);
+export const enableTabs = new BooleanSetting("enable_tabs", true);
+export const displayLambdas = new BooleanSetting("display_lambdas", false);
+export const bytecode = new BooleanSetting("bytecode", false);
+export const focusSearch = new KeybindSetting("focus_search", "Ctrl+ ");
 
 export const supportsPermalinking = combineLatest([displayLambdas.observable, bytecode.observable]).pipe(
     map(([lambdaDisplay, bytecode]) => {
-        if (lambdaDisplay || bytecode) {
-            // Alters the decompilation output, so permalinks are not stable
-            return false;
-        }
-
-        return true;
+        return !(lambdaDisplay || bytecode);
     })
 );
 

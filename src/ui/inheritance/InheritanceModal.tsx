@@ -1,21 +1,24 @@
-import { lazy, Suspense } from "react";
 import { Modal, Spin, Tabs } from "antd";
+import { Suspense, lazy } from "react";
+import { type ClassNode, selectedInheritanceClassName, selectedInheritanceClassNode } from "../../logic/Inheritance";
 import { useObservable } from "../../utils/UseObservable";
-import { ClassNode, selectedInheritanceClassName, selectedInheritanceClassNode } from "../../logic/Inheritance";
 
 const InheritanceTree = lazy(() => import("./InheritanceTree"));
 const InheritanceGraph = lazy(() => import("./InheritanceGraph"));
 
-const Inheritance = ({ data }: { data: ClassNode; }) => {
-    const items = [{
-        key: "tree",
-        label: "Tree",
-        children: <InheritanceTree data={data} />,
-    }, {
-        key: "graph",
-        label: "Graph",
-        children: <InheritanceGraph data={data} />,
-    }];
+const Inheritance = ({ data }: { data: ClassNode }) => {
+    const items = [
+        {
+            key: "tree",
+            label: "Tree",
+            children: <InheritanceTree data={data} />,
+        },
+        {
+            key: "graph",
+            label: "Graph",
+            children: <InheritanceGraph data={data} />,
+        },
+    ];
 
     return <Tabs defaultActiveKey="tree" items={items} />;
 };
@@ -33,7 +36,13 @@ const InheritanceModal = () => {
             style={{ top: 20 }}
         >
             {data ? (
-                <Suspense fallback={<div style={{ textAlign: 'center', padding: '20px' }}><Spin /></div>}>
+                <Suspense
+                    fallback={
+                        <div style={{ textAlign: "center", padding: "20px" }}>
+                            <Spin />
+                        </div>
+                    }
+                >
                     <Inheritance data={data} />
                 </Suspense>
             ) : (

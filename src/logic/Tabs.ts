@@ -1,11 +1,11 @@
+import type { editor } from "monaco-editor";
 import { BehaviorSubject } from "rxjs";
-import { setSelectedFile, state } from "./State";
 import { enableTabs } from "./Settings";
-import { editor } from "monaco-editor";
+import { setSelectedFile, state } from "./State";
 
 class Tab {
     public key: string;
-    public scroll: number = 0;
+    public scroll = 0;
 
     public viewState: editor.ICodeEditorViewState | null = null;
     public model: editor.ITextModel | null = null;
@@ -29,10 +29,7 @@ class Tab {
         return true;
     }
 
-    cacheView(
-        viewState: editor.ICodeEditorViewState | null,
-        model: editor.ITextModel | null
-    ) {
+    cacheView(viewState: editor.ICodeEditorViewState | null, model: editor.ITextModel | null) {
         this.viewState = viewState;
         this.model = model;
     }
@@ -56,22 +53,24 @@ export const activeTabKey = new BehaviorSubject<string>(state.value.file);
 export const openTabs = new BehaviorSubject<Tab[]>([new Tab(state.value.file)]);
 export const tabHistory = new BehaviorSubject<string[]>([state.value.file]);
 
-export const getOpenTab = (): (Tab | null) => {
-    return openTabs.value.find(o => o.key === activeTabKey.value) || null;
+export const getOpenTab = (): Tab | null => {
+    return openTabs.value.find((o) => o.key === activeTabKey.value) || null;
 };
 
 export const openTab = (key: string) => {
     if (!enableTabs.value) {
         setSelectedFile(key);
+
         return;
     }
 
     const tabs = [...openTabs.value];
-    const activeIndex = tabs.findIndex(tab => tab.key === activeTabKey.value);
+    const activeIndex = tabs.findIndex((tab) => tab.key === activeTabKey.value);
 
     // If class is not already open, open it
-    if (!tabs.some(tab => tab.key === key)) {
+    if (!tabs.some((tab) => tab.key === key)) {
         const insertIndex = activeIndex >= 0 ? activeIndex + 1 : tabs.length;
+
         tabs.splice(insertIndex, 0, new Tab(key));
         openTabs.next(tabs);
     }
@@ -91,20 +90,22 @@ export const openTab = (key: string) => {
 export const closeTab = (key: string) => {
     if (openTabs.value.length <= 1) return;
 
-    const tab = openTabs.value.find(o => o.key === key);
+    const tab = openTabs.value.find((o) => o.key === key);
 
     tab?.invalidateCachedView();
-    tabHistory.next(tabHistory.value.filter(v => v != key));
-    const modifiedOpenTabs = openTabs.value.filter(v => v.key != key);
+    tabHistory.next(tabHistory.value.filter((v) => v !== key));
+    const modifiedOpenTabs = openTabs.value.filter((v) => v.key !== key);
 
     if (key === activeTabKey.value) {
         const history = [...tabHistory.value];
         let newKey = history.pop();
+
         tabHistory.next(history);
 
         if (!newKey) {
             // If undefined, open tab left of it
-            let i = openTabs.value.findIndex(tab => tab.key === key) - 1;
+            let i = openTabs.value.findIndex((tab) => tab.key === key) - 1;
+
             i = Math.max(i, 0);
             i = Math.min(i, modifiedOpenTabs.length - 1);
             newKey = modifiedOpenTabs[i].key;
@@ -118,7 +119,8 @@ export const closeTab = (key: string) => {
 
 export const setTabPosition = (key: string, placeIndex: number) => {
     const tabs = [...openTabs.value];
-    const currentIndex = tabs.findIndex(tab => tab.key === key);
+    const currentIndex = tabs.findIndex((tab) => tab.key === key);
+
     if (currentIndex === -1) return;
     const currentTab = tabs[currentIndex];
 
@@ -126,6 +128,7 @@ export const setTabPosition = (key: string, placeIndex: number) => {
 
     // Adjust index if moving right
     let index = placeIndex;
+
     if (placeIndex > currentIndex) index -= 1;
 
     tabs.splice(index, 0, currentTab);
@@ -133,13 +136,16 @@ export const setTabPosition = (key: string, placeIndex: number) => {
 };
 
 export const closeOtherTabs = (key: string) => {
-    const tab = openTabs.value.find(tab => tab.key === key);
+    const tab = openTabs.value.find((tab) => tab.key === key);
+
     if (!tab) return;
 
     // Invalidate all tabs except the one being kept
-    openTabs.value.forEach(t => {
-        if (t.key !== key) t.invalidateCachedView();
-    });
+    for (const t of openTabs.value) {
+        if (t.key !== key) {
+            t.invalidateCachedView();
+        }
+    }
 
     openTabs.next([tab]);
     tabHistory.next([key]);

@@ -1,17 +1,17 @@
-import { Button, ConfigProvider, Drawer, Flex, Splitter, theme } from 'antd';
+import { MenuFoldOutlined } from "@ant-design/icons";
+import { Button, ConfigProvider, Drawer, Flex, Splitter, theme } from "antd";
+import { useState } from "react";
+import { isThin } from "../logic/Browser.ts";
+import { diffView } from "../logic/Diff.ts";
+import { enableTabs } from "../logic/Settings.ts";
+import { useObservable } from "../utils/UseObservable.ts";
 import Code from "./Code.tsx";
-import SideBar from './SideBar.tsx';
-import { useState } from 'react';
-import { useObservable } from '../utils/UseObservable.ts';
-import { isThin } from '../logic/Browser.ts';
-import { HeaderBody } from './Header.tsx';
-import { diffView } from '../logic/Diff.ts';
-import DiffView from './diff/DiffView.tsx';
-import { FilepathHeader } from './FilepathHeader.tsx';
-import { enableTabs } from '../logic/Settings.ts';
-import { MenuFoldOutlined } from '@ant-design/icons';
-import { TabsComponent } from './TabsComponent.tsx';
-import Modals from './Modals.tsx';
+import { FilepathHeader } from "./FilepathHeader.tsx";
+import { HeaderBody } from "./Header.tsx";
+import Modals from "./Modals.tsx";
+import SideBar from "./SideBar.tsx";
+import { TabsComponent } from "./TabsComponent.tsx";
+import DiffView from "./diff/DiffView.tsx";
 
 const App = () => {
     const isSmall = useObservable(isThin);
@@ -27,7 +27,7 @@ const App = () => {
                     },
                     Tabs: {
                         horizontalMargin: "0",
-                    }
+                    },
                 },
             }}
         >
@@ -38,12 +38,12 @@ const App = () => {
 };
 
 const LargeApp = () => {
-    const [sizes, setSizes] = useState<(number | string)[]>(['25%', '75%']);
+    const [sizes, setSizes] = useState<(number | string)[]>(["25%", "75%"]);
     const tabsEnabled = useObservable(enableTabs.observable);
 
     return (
         <Splitter onResize={setSizes}>
-            <Splitter.Panel collapsible defaultSize="200px" min="5%" size={sizes[0]} style={{ height: '100vh' }}>
+            <Splitter.Panel collapsible defaultSize="200px" min="5%" size={sizes[0]} style={{ height: "100vh" }}>
                 <SideBar />
             </Splitter.Panel>
             <Splitter.Panel size={sizes[1]}>
@@ -54,7 +54,6 @@ const LargeApp = () => {
         </Splitter>
     );
 };
-
 
 const MobileApp = () => {
     const [open, setOpen] = useState(false);
@@ -73,7 +72,7 @@ const MobileApp = () => {
             <Drawer
                 onClose={onClose}
                 open={open}
-                placement='left'
+                placement="left"
                 styles={{ body: { padding: 0 } }}
                 extra={<HeaderBody />}
             >
@@ -87,18 +86,20 @@ const MobileApp = () => {
                     icon={<MenuFoldOutlined />}
                     style={{
                         flexShrink: 0,
-                        margin: ".5rem .5rem .5rem 1.5rem"
+                        margin: ".5rem .5rem .5rem 1.5rem",
                     }}
                 />
-                {tabsEnabled &&
-                    <span style={{ overflowX: "auto" }}> <TabsComponent /> </span>
-                }
+                {tabsEnabled && (
+                    <span style={{ overflowX: "auto" }}>
+                        {" "}
+                        <TabsComponent />{" "}
+                    </span>
+                )}
             </Flex>
             <FilepathHeader />
             <Code />
         </Flex>
     );
 };
-
 
 export default App;

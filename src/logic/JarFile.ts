@@ -1,23 +1,28 @@
-import { BehaviorSubject, combineLatest, distinct, distinctUntilChanged, map, Observable, switchMap, throttleTime } from 'rxjs';
-import { minecraftJar } from './MinecraftApi';
-import { performSearch } from './Search';
+import {
+    BehaviorSubject,
+    type Observable,
+    combineLatest,
+    distinctUntilChanged,
+    map,
+    switchMap,
+    throttleTime,
+} from "rxjs";
+import { minecraftJar } from "./MinecraftApi";
+import { performSearch } from "./Search";
 
 export const fileList = minecraftJar.pipe(
     distinctUntilChanged(),
-    map(jar => Object.keys(jar.jar.entries))
+    map((jar) => Object.keys(jar.jar.entries))
 );
 
 // File list that only contains outer class files
 export const classesList = fileList.pipe(
-    map(files => files.filter(file => file.endsWith('.class') && !file.includes('$')))
+    map((files) => files.filter((file) => file.endsWith(".class") && !file.includes("$")))
 );
 
 export const searchQuery = new BehaviorSubject("");
 
-const debouncedSearchQuery: Observable<string> = searchQuery.pipe(
-    throttleTime(200),
-    distinctUntilChanged()
-);
+const debouncedSearchQuery: Observable<string> = searchQuery.pipe(throttleTime(200), distinctUntilChanged());
 
 export const searchResults: Observable<string[]> = combineLatest([classesList, debouncedSearchQuery]).pipe(
     switchMap(([classes, query]) => {
@@ -25,6 +30,4 @@ export const searchResults: Observable<string[]> = combineLatest([classesList, d
     })
 );
 
-export const isSearching = searchQuery.pipe(
-    map((query) => query.length > 0)
-);
+export const isSearching = searchQuery.pipe(map((query) => query.length > 0));

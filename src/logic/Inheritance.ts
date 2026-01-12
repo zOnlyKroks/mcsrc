@@ -6,7 +6,7 @@ export class ClassNode {
     readonly name: string;
     parents: ClassNode[] = [];
     children: ClassNode[] = [];
-    accessFlags: number = 0;
+    accessFlags = 0;
 
     constructor(name: string) {
         this.name = name;
@@ -28,10 +28,12 @@ export class InheritanceIndex {
 
     addClass(className: string): ClassNode {
         let node = this.index.get(className);
+
         if (!node) {
             node = new ClassNode(className);
             this.index.set(className, node);
         }
+
         return node;
     }
 
@@ -55,8 +57,6 @@ export class InheritanceIndex {
     }
 }
 
-
-
 export const selectedInheritanceClassName = new BehaviorSubject<string | null>(null);
 
 export const inheritanceIndex = combineLatest([jarIndex, minecraftJar]).pipe(
@@ -65,11 +65,11 @@ export const inheritanceIndex = combineLatest([jarIndex, minecraftJar]).pipe(
         const index = new InheritanceIndex();
 
         const classDataArray = await jarIndexInstance.getClassData();
-        
+
         const classNames = new Set(
             Object.keys(jarInstance.jar.entries)
-                .filter(name => name.endsWith(".class"))
-                .map(name => name.slice(0, -6))
+                .filter((name) => name.endsWith(".class"))
+                .map((name) => name.slice(0, -6))
         );
 
         for (const classData of classDataArray) {
@@ -78,6 +78,7 @@ export const inheritanceIndex = combineLatest([jarIndex, minecraftJar]).pipe(
             }
 
             const node = index.addClass(classData.className);
+
             node.accessFlags = classData.accessFlags;
 
             if (classData.superName && classData.superName.length > 0 && classNames.has(classData.superName)) {
@@ -97,13 +98,12 @@ export const inheritanceIndex = combineLatest([jarIndex, minecraftJar]).pipe(
 );
 
 export const selectedInheritanceClassNode = selectedInheritanceClassName.pipe(
-    switchMap(className => {
+    switchMap((className) => {
         if (className === null) {
             return of(null);
         }
-        return inheritanceIndex.pipe(
-            map(index => index.addClass(className))
-        );
+
+        return inheritanceIndex.pipe(map((index) => index.addClass(className)));
     }),
     shareReplay({ bufferSize: 1, refCount: false })
 );

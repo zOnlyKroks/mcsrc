@@ -1,16 +1,16 @@
 import { Editor, useMonaco } from "@monaco-editor/react";
-import { useObservable } from "../utils/UseObservable";
-import { currentResult } from "../logic/Decompiler";
-import { useEffect, useRef } from "react";
 import type { editor } from "monaco-editor";
+import { useEffect, useRef } from "react";
+import { currentResult } from "../logic/Decompiler";
+import { useObservable } from "../utils/UseObservable";
 import { JavdocCompletionProvider } from "./JavadocCmpletionProvider";
 
 const JavadocMarkdownEditor = ({
     value,
-    onChange
+    onChange,
 }: {
     value: string;
-    onChange: (newValue: string | undefined) => void;
+    onChange: (_newValue: string | undefined) => void;
 }) => {
     const monaco = useMonaco();
     const decompileResult = useObservable(currentResult);
@@ -19,7 +19,10 @@ const JavadocMarkdownEditor = ({
     useEffect(() => {
         if (!monaco || !decompileResult) return;
 
-        const completionItemProvider = monaco.languages.registerCompletionItemProvider('markdown', new JavdocCompletionProvider(decompileResult));
+        const completionItemProvider = monaco.languages.registerCompletionItemProvider(
+            "markdown",
+            new JavdocCompletionProvider(decompileResult)
+        );
 
         return () => {
             completionItemProvider.dispose();

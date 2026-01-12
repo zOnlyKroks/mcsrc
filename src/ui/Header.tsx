@@ -1,14 +1,14 @@
 import { Divider, Flex, Select, Space } from "antd";
+import { diffView } from "../logic/Diff";
 import { minecraftVersionIds, selectedMinecraftVersion } from "../logic/MinecraftApi";
 import { useObservable } from "../utils/UseObservable";
 import { AboutModalButton } from "./AboutModal";
 import { SettingsModalButton } from "./SettingsModal";
-import { diffView } from "../logic/Diff";
 
 const Header = () => {
     return (
         <div>
-            <Flex justify="center" style={{ width: '100%', paddingTop: 8 }}>
+            <Flex justify="center" style={{ width: "100%", paddingTop: 8 }}>
                 <HeaderBody />
             </Flex>
             <Divider size="small" />
@@ -19,6 +19,8 @@ const Header = () => {
 export const HeaderBody = () => {
     const versions = useObservable(minecraftVersionIds);
     const currentVersion = useObservable(selectedMinecraftVersion);
+
+
     return (
         <Space align="center">
             <Select
@@ -26,6 +28,7 @@ export const HeaderBody = () => {
                 onChange={(v) => {
                     if (v == "diff") {
                         diffView.next(true);
+
                         return;
                     }
 
@@ -33,9 +36,13 @@ export const HeaderBody = () => {
                     selectedMinecraftVersion.next(v);
                 }}
             >
-                <Select.Option key={"diff"} value={"diff"}>Compare</Select.Option>
-                {versions?.map(v => (
-                    <Select.Option key={v} value={v}>{v}</Select.Option>
+                <Select.Option key={"diff"} value={"diff"}>
+                    Compare
+                </Select.Option>
+                {versions?.map((v) => (
+                    <Select.Option key={v} value={v}>
+                        {v}
+                    </Select.Option>
                 ))}
             </Select>
             <SettingsModalButton />

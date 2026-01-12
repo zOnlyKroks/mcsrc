@@ -1,7 +1,8 @@
 import { Tabs } from "antd";
+import type React from "react";
+import { useEffect, useRef, useState } from "react";
+import { activeTabKey, closeOtherTabs, closeTab, openTab, openTabs, setTabPosition } from "../logic/Tabs";
 import { useObservable } from "../utils/UseObservable";
-import { activeTabKey, closeTab, openTab, openTabs, setTabPosition, closeOtherTabs } from "../logic/Tabs";
-import React, { useEffect, useRef, useState } from "react";
 
 export const TabsComponent = () => {
     // variables - tabs
@@ -10,7 +11,7 @@ export const TabsComponent = () => {
     const tabRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
     // variables - context menu
-    const [contextMenu, setContextMenu] = useState<{ x: number; y: number; key: string; } | null>(null);
+    const [contextMenu, setContextMenu] = useState<{ x: number; y: number; key: string } | null>(null);
 
     // variables - dragging
     const draggingKey = useRef("");
@@ -29,11 +30,13 @@ export const TabsComponent = () => {
     const getRects = () => {
         return Object.entries(tabRefs.current).map(([k, el]) => {
             const rect = el?.getBoundingClientRect();
-            return ({
+
+
+            return {
                 key: k,
                 x: rect?.x ?? -1000,
-                width: rect?.width ?? 0
-            });
+                width: rect?.width ?? 0,
+            };
         });
     };
 
@@ -42,18 +45,20 @@ export const TabsComponent = () => {
 
         const style = {
             borderLeft: "2px solid transparent",
-            borderRight: "2px solid transparent"
+            borderRight: "2px solid transparent",
         };
 
-        const tabIndex = tabs.findIndex(tab => tab.key === key);
+        const tabIndex = tabs.findIndex((tab) => tab.key === key);
 
         if (tabIndex === placeIndex && mouseMovementDelta.current >= threshold) {
             style.borderLeft = "2px solid white";
+
             return style;
-        };
+        }
 
         if (tabIndex === tabs.length - 1 && placeIndex > tabIndex && mouseMovementDelta.current >= threshold) {
             style.borderRight = "2px solid white";
+
             return style;
         }
 
@@ -65,6 +70,7 @@ export const TabsComponent = () => {
 
         // Not the best, but it works :>
         const ghost = document.createElement("div");
+
         ghost.textContent = element.textContent || "";
         ghost.style.position = "absolute";
         ghost.style.background = "black";
@@ -97,6 +103,7 @@ export const TabsComponent = () => {
         if (e.button === 1) {
             e.preventDefault();
             closeTab(key);
+
             return;
         }
 
@@ -119,11 +126,12 @@ export const TabsComponent = () => {
         if (draggingKey.current === "") return;
 
         const rects = getRects();
-        if (!rects[0]) return;
 
+        if (!rects[0]) return;
 
         const dx = e.clientX - lastMousePos.current.x;
         const dy = e.clientY - lastMousePos.current.y;
+
         mouseMovementDelta.current += Math.sqrt(dx * dx + dy * dy);
 
         lastMousePos.current = { x: e.clientX, y: e.clientY };
@@ -134,8 +142,7 @@ export const TabsComponent = () => {
             ghostImage.current.style.visibility = "visible";
             ghostImage.current.style.left = e.clientX + "px";
             ghostImage.current.style.top = e.clientY + "px";
-        };
-
+        }
 
         const startX = rects[0].x;
 
@@ -143,17 +150,21 @@ export const TabsComponent = () => {
         const mouseX = clientX - startX;
 
         const closest = rects
-            .map(r => {
+            .map((r) => {
                 const mid = r.x + r.width / 2 - startX;
+
+
                 return {
                     key: r.key,
                     dist: Math.abs(mid - mouseX),
-                    before: mouseX < mid // before midpoint?
+                    before: mouseX < mid, // before midpoint?
                 };
             })
             .sort((a, b) => a.dist - b.dist)[0];
 
-        const index = (tabs?.findIndex(tab => tab.key === closest.key) ?? -Infinity) + (closest.before ? 0 : 1);
+        const index =
+            (tabs?.findIndex((tab) => tab.key === closest.key) ?? Number.NEGATIVE_INFINITY) + (closest.before ? 0 : 1);
+
         if (index < 0) return;
 
         setPlaceIndexSync(index);
@@ -163,11 +174,9 @@ export const TabsComponent = () => {
         document.removeEventListener("mouseup", handleMouseUp);
         document.removeEventListener("mouseover", handleMouseMove);
 
-        const currentIndex = tabs ? tabs.findIndex(tab => tab.key === draggingKey.current) : -1;
-        if (
-            placeIndexRef.current >= 0 &&
-            placeIndexRef.current !== currentIndex
-        ) {
+        const currentIndex = tabs ? tabs.findIndex((tab) => tab.key === draggingKey.current) : -1;
+
+        if (placeIndexRef.current >= 0 && placeIndexRef.current !== currentIndex) {
             setTabPosition(draggingKey.current, placeIndexRef.current);
             openTab(draggingKey.current);
         }
@@ -197,6 +206,7 @@ export const TabsComponent = () => {
     useEffect(() => {
         if (contextMenu) {
             document.addEventListener("click", handleCloseContextMenu);
+
             return () => document.removeEventListener("click", handleCloseContextMenu);
         }
     }, [contextMenu]);
@@ -213,22 +223,24 @@ export const TabsComponent = () => {
                     key,
                     label: (
                         <div
-                            onMouseDown={(e) => { handleMouseDown(e, key); }}
-                            onContextMenu={(e) => { handleContextMenu(e, key); }}
-                            ref={(el) => { tabRefs.current[key] = el; }}
-                            style={{ userSelect: "none", }}
+                            onMouseDown={(e) => {
+                                handleMouseDown(e, key);
+                            }}
+                            onContextMenu={(e) => {
+                                handleContextMenu(e, key);
+                            }}
+                            ref={(el) => {
+                                tabRefs.current[key] = el;
+                            }}
+                            style={{ userSelect: "none" }}
                         >
                             {key.replace(".class", "").split("/").pop()}
                         </div>
-                    )
+                    ),
                 }))}
                 renderTabBar={(tabBarProps, DefaultTabBar) => (
                     <DefaultTabBar {...tabBarProps}>
-                        {(node) => (
-                            <div style={borderStyle(String(node.key))}>
-                                {node}
-                            </div>
-                        )}
+                        {(node) => <div style={borderStyle(String(node.key))}>{node}</div>}
                     </DefaultTabBar>
                 )}
             />
@@ -245,7 +257,7 @@ export const TabsComponent = () => {
                         padding: "4px 0",
                         zIndex: 1000,
                         minWidth: "160px",
-                        boxShadow: "0 2px 8px rgba(0,0,0,0.5)"
+                        boxShadow: "0 2px 8px rgba(0,0,0,0.5)",
                     }}
                     onClick={(e) => e.stopPropagation()}
                 >
@@ -255,7 +267,7 @@ export const TabsComponent = () => {
                             padding: "6px 12px",
                             cursor: "pointer",
                             color: "#cccccc",
-                            fontSize: "13px"
+                            fontSize: "13px",
                         }}
                         onMouseEnter={(e) => {
                             e.currentTarget.style.background = "#2a2a2a";

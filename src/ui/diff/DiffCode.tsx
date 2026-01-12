@@ -1,11 +1,11 @@
-import { DiffEditor } from '@monaco-editor/react';
-import { useObservable } from '../../utils/UseObservable';
-import { getLeftDiff, getRightDiff } from '../../logic/Diff';
-import { useRef } from 'react';
-import type { editor } from 'monaco-editor';
+import { LoadingOutlined } from "@ant-design/icons";
+import { DiffEditor } from "@monaco-editor/react";
 import { Spin } from "antd";
-import { LoadingOutlined } from '@ant-design/icons';
+import type { editor } from "monaco-editor";
+import { useRef } from "react";
 import { isDecompiling } from "../../logic/Decompiler.ts";
+import { getLeftDiff, getRightDiff } from "../../logic/Diff";
+import { useObservable } from "../../utils/UseObservable";
 
 interface DiffCodeProps {
     height?: number | string;
@@ -39,8 +39,8 @@ const DiffCode = ({ height }: DiffCodeProps) => {
             spinning={!!loading}
             tip="Decompiling..."
             style={{
-                height: '100%',
-                color: 'white'
+                height: "100%",
+                color: "white",
             }}
         >
             {/*
@@ -51,7 +51,7 @@ const DiffCode = ({ height }: DiffCodeProps) => {
             exact pixel count
             */}
             <DiffEditor
-                height={typeof height === "string" ? height.replace("\%", "vh") : height}
+                height={typeof height === "string" ? height.replace("%", "vh") : height}
                 language="java"
                 theme="vs-dark"
                 original={leftResult?.source}
@@ -65,7 +65,8 @@ const DiffCode = ({ height }: DiffCodeProps) => {
                     readOnly: true,
                     domReadOnly: true,
                     //tabSize: 3,
-                }} />
+                }}
+            />
         </Spin>
     );
 };

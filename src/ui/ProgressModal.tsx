@@ -6,12 +6,7 @@ const ProcesModal = () => {
     const progress = useObservable(downloadProgress);
 
     return (
-        <Modal
-            title="Downloading Minecraft Jar"
-            open={progress !== undefined}
-            footer={null}
-            closable={false}
-        >
+        <Modal title="Downloading Minecraft Jar" open={progress !== undefined} footer={null} closable={false}>
             <Progress percent={progress ?? 0} />
         </Modal>
     );

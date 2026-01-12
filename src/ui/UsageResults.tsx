@@ -1,12 +1,14 @@
-import { useObservable } from "../utils/UseObservable";
+import { type Observable, map } from "rxjs";
 import { formatUsage, goToUsage, usageQuery, useageResults } from "../logic/FindUsages";
-import type { UsageString } from "../workers/JarIndex";
-import { map, Observable } from "rxjs";
 import { openTab } from "../logic/Tabs";
+import { useObservable } from "../utils/UseObservable";
+import type { UsageString } from "../workers/JarIndex";
 
 function getUsageClass(usage: UsageString): string {
     if (usage.startsWith("m:") || usage.startsWith("f:")) {
         const parts = usage.slice(2).split(":");
+
+
         return parts[0];
     }
 
@@ -20,11 +22,12 @@ interface UsageGroup {
 }
 
 const groupedResults: Observable<UsageGroup[]> = useageResults.pipe(
-    map(results => {
+    map((results) => {
         const groups: Record<string, UsageString[]> = {};
 
         for (const usage of results) {
             const className = getUsageClass(usage);
+
             if (!groups[className]) {
                 groups[className] = [];
             }
@@ -33,7 +36,7 @@ const groupedResults: Observable<UsageGroup[]> = useageResults.pipe(
 
         return Object.entries(groups).map(([className, usages]) => ({
             className,
-            usages
+            usages,
         }));
     })
 );
@@ -54,10 +57,10 @@ const UsageGroupItem = ({ group }: UsageGroupItemProps) => {
                     fontSize: "13px",
                     fontWeight: "bold",
                     transition: "background-color 0.2s",
-                    borderRadius: "4px"
+                    borderRadius: "4px",
                 }}
-                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)'}
-                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "rgba(255, 255, 255, 0.1)")}
+                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
             >
                 {group.className}
             </div>
@@ -70,10 +73,10 @@ const UsageGroupItem = ({ group }: UsageGroupItemProps) => {
                             cursor: "pointer",
                             fontSize: "12px",
                             transition: "background-color 0.2s",
-                            color: "rgba(255, 255, 255, 0.7)"
+                            color: "rgba(255, 255, 255, 0.7)",
                         }}
-                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.05)'}
-                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                        onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "rgba(255, 255, 255, 0.05)")}
+                        onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
                     >
                         {formatUsage(usage)}
                     </div>

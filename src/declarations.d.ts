@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 declare module "*/java.wasm-runtime.js" {
     export async function load(src: string);
 }

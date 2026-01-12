@@ -1,10 +1,10 @@
-import LoginModal from "../javadoc/api/LoginModal";
 import JavadocModal from "../javadoc/JavadocModal";
-import IndexProgressModal from "./IndexProgressModal";
-import InheritanceModal from "./inheritance/InheritanceModal";
-import ProgressModal from "./ProgressModal";
+import LoginModal from "../javadoc/api/LoginModal";
 import AboutModal from "./AboutModal";
+import IndexProgressModal from "./IndexProgressModal";
+import ProgressModal from "./ProgressModal";
 import SettingsModal from "./SettingsModal";
+import InheritanceModal from "./inheritance/InheritanceModal";
 
 const Modals = () => {
     return (

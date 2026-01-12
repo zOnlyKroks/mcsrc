@@ -1,7 +1,7 @@
 import { Select } from "antd";
-import { useObservable } from "../../utils/UseObservable";
-import { minecraftVersionIds } from "../../logic/MinecraftApi";
 import { getLeftDiff, getRightDiff } from "../../logic/Diff";
+import { minecraftVersionIds } from "../../logic/MinecraftApi";
+import { useObservable } from "../../utils/UseObservable";
 
 const DiffVersionSelection = () => {
     const versions = useObservable(minecraftVersionIds);
@@ -21,19 +21,23 @@ const DiffVersionSelection = () => {
                     getLeftDiff().selectedVersion.next(v);
                 }}
             >
-                {versions?.map(v => (
-                    <Select.Option key={v} value={v}>{v}</Select.Option>
+                {versions?.map((v) => (
+                    <Select.Option key={v} value={v}>
+                        {v}
+                    </Select.Option>
                 ))}
             </Select>
-            <span style={{ fontSize: 12, color: '#888' }}>→</span>
+            <span style={{ fontSize: 12, color: "#888" }}>→</span>
             <Select
                 value={rightVersion || versions?.[0]}
                 onChange={(v) => {
                     getRightDiff().selectedVersion.next(v);
                 }}
             >
-                {versions?.map(v => (
-                    <Select.Option key={v} value={v}>{v}</Select.Option>
+                {versions?.map((v) => (
+                    <Select.Option key={v} value={v}>
+                        {v}
+                    </Select.Option>
                 ))}
             </Select>
         </>

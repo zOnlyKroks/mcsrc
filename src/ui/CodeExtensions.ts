@@ -1,14 +1,14 @@
-import type { CancellationToken, IDisposable, IPosition, IRange, languages } from "monaco-editor";
-import { editor, Range, Uri } from "monaco-editor";
-import type { DecompileResult } from '../logic/Decompiler';
-import { currentResult } from '../logic/Decompiler';
-import { activeTabKey, openTab } from '../logic/Tabs';
-import { getTokenLocation, type Token } from '../logic/Tokens';
+import type { IDisposable, IPosition, languages } from "monaco-editor";
+import { Range, Uri, type editor } from "monaco-editor";
 import { filter, take } from "rxjs";
+import type { DecompileResult } from "../logic/Decompiler";
+import { currentResult } from "../logic/Decompiler";
+import { activeTabKey, openTab } from "../logic/Tabs";
+import { getTokenLocation } from "../logic/Tokens";
 
 export function jumpToToken(
     result: DecompileResult,
-    targetType: 'method' | 'field' | 'class',
+    targetType: "method" | "field" | "class",
     target: string,
     editor: editor.ICodeEditor,
     sameFile = false
@@ -19,7 +19,8 @@ export function jumpToToken(
             !(targetType === "method" && "descriptor" in token && token.descriptor === target) &&
             !(targetType === "field" && "name" in token && token.name === target) &&
             !(targetType === "class" && token.className === target)
-        ) continue;
+        )
+            continue;
 
         const { line, column } = getTokenLocation(result, token);
         let listener: IDisposable;
@@ -27,6 +28,7 @@ export function jumpToToken(
             if (listener) listener.dispose();
             editor.setSelection(new Range(line, column, line, column + token.length));
         };
+
         if (sameFile) {
             updateSelection();
             editor.revealLineInCenter(line, 0);
@@ -45,11 +47,12 @@ export function createDefinitionProvider(
     classListRef: { current: string[] | undefined; }
 ) {
     return {
-        provideDefinition(model: editor.ITextModel, position: IPosition, token: CancellationToken) {
+        provideDefinition(model: editor.ITextModel, position: IPosition) {
             const { lineNumber, column } = position;
 
             if (!decompileResultRef.current) {
                 console.error("No decompile result available for definition provider.");
+
                 return null;
             }
 
@@ -72,20 +75,22 @@ export function createDefinitionProvider(
 
                 if (targetOffset >= token.start && targetOffset <= token.start + token.length) {
                     const className = token.className + ".class";
-                    const baseClassName = token.className.split('$')[0] + ".class";
+                    const baseClassName = token.className.split("$")[0] + ".class";
+
                     console.log(`Found token for definition: ${className} at offset ${token.start}`);
 
                     if (classList && (classList.includes(className) || classList.includes(baseClassName))) {
-                        const targetClass = className;
                         const range = new Range(lineNumber, column, lineNumber, column + token.length);
 
                         return {
-                            uri: "descriptor" in token ?
-                                Uri.parse(`goto://class/${className}#${token.type}:${token.type === "method" ?
-                                    token.descriptor : token.name
-                                    }`) :
-                                Uri.parse(`goto://class/${className}`),
-                            range
+                            uri:
+                                "descriptor" in token
+                                    ? Uri.parse(
+                                        `goto://class/${className}#${token.type}:${token.type === "method" ? token.descriptor : token.name
+                                        }`
+                                    )
+                                    : Uri.parse(`goto://class/${className}`),
+                            range,
                         };
                     }
 
@@ -104,47 +109,63 @@ export function createDefinitionProvider(
     };
 }
 
-export function createEditorOpener(
-    decompileResultRef: { current: DecompileResult | undefined; }
-) {
+export function createEditorOpener(decompileResultRef: { current: DecompileResult | undefined; }) {
     return {
-        openCodeEditor: function (editor: editor.ICodeEditor, resource: Uri, selectionOrPosition?: IRange | IPosition): boolean | Promise<boolean> {
+        openCodeEditor: (
+            editor: editor.ICodeEditor,
+            resource: Uri,
+        ): boolean | Promise<boolean> => {
             if (!resource.scheme.startsWith("goto")) {
                 return false;
             }
 
             const className = resource.path.substring(1);
-            const baseClassName = className.includes('$') ? className.split('$')[0] + ".class" : className;
+            const baseClassName = className.includes("$") ? className.split("$")[0] + ".class" : className;
+
             console.log(className);
             console.log(baseClassName);
 
             const jumpInSameFile = baseClassName === activeTabKey.value;
-            const fragment = resource.fragment.split(":") as ['method' | 'field', string];
+            const fragment = resource.fragment.split(":") as ["method" | "field", string];
+
             if (fragment.length === 2) {
                 const [targetType, target] = fragment;
+
                 if (jumpInSameFile) {
                     jumpToToken(decompileResultRef.current!, targetType, target, editor, true);
                 } else {
-                    const subscription = currentResult.pipe(filter(value => value.className === baseClassName), take(1)).subscribe(value => {
-                        subscription.unsubscribe();
-                        jumpToToken(value, targetType, target, editor);
-                    });
+                    const subscription = currentResult
+                        .pipe(
+                            filter((value) => value.className === baseClassName),
+                            take(1)
+                        )
+                        .subscribe((value) => {
+                            subscription.unsubscribe();
+                            jumpToToken(value, targetType, target, editor);
+                        });
                 }
             } else if (baseClassName != className) {
                 // Handle inner class navigation
-                const innerClassName = className.replace('.class', '');
+                const innerClassName = className.replace(".class", "");
+
                 if (jumpInSameFile) {
-                    jumpToToken(decompileResultRef.current!, 'class', innerClassName, editor, true);
+                    jumpToToken(decompileResultRef.current!, "class", innerClassName, editor, true);
                 } else {
-                    const subscription = currentResult.pipe(filter(value => value.className === baseClassName), take(1)).subscribe(value => {
-                        subscription.unsubscribe();
-                        jumpToToken(value, 'class', innerClassName, editor);
-                    });
+                    const subscription = currentResult
+                        .pipe(
+                            filter((value) => value.className === baseClassName),
+                            take(1)
+                        )
+                        .subscribe((value) => {
+                            subscription.unsubscribe();
+                            jumpToToken(value, "class", innerClassName, editor);
+                        });
                 }
             }
             openTab(baseClassName);
+
             return true;
-        }
+        },
     };
 }
 
@@ -156,9 +177,10 @@ export function createFoldingRangeProvider(monaco: any) {
 
         for (let i = 0; i < lines.length; i++) {
             const trimmedLine = lines[i].trim();
-            if (trimmedLine.startsWith('package ')) {
+
+            if (trimmedLine.startsWith("package ")) {
                 packageLine = i + 1;
-            } else if (trimmedLine.startsWith('import ')) {
+            } else if (trimmedLine.startsWith("import ")) {
                 if (firstImportLine === null) {
                     firstImportLine = i + 1;
                 }
@@ -170,6 +192,7 @@ export function createFoldingRangeProvider(monaco: any) {
         // If not its likely a package-info and doesnt need folding.
         if (lastImportLine !== null) {
             let hasContentAfterImports = false;
+
             for (let i = lastImportLine; i < lines.length; i++) {
                 if (lines[i].trim().length > 0) {
                     hasContentAfterImports = true;
@@ -184,18 +207,22 @@ export function createFoldingRangeProvider(monaco: any) {
 
         // Include the package line before imports to completely hide them when folded
         if (packageLine !== null && firstImportLine !== null && lastImportLine !== null) {
-            return [{
-                start: packageLine,
-                end: lastImportLine,
-                kind: monaco.languages.FoldingRangeKind.Imports
-            }];
+            return [
+                {
+                    start: packageLine,
+                    end: lastImportLine,
+                    kind: monaco.languages.FoldingRangeKind.Imports,
+                },
+            ];
         } else if (firstImportLine !== null && lastImportLine !== null && firstImportLine < lastImportLine) {
             // Fallback if no package line exists
-            return [{
-                start: firstImportLine,
-                end: lastImportLine,
-                kind: monaco.languages.FoldingRangeKind.Imports
-            }];
+            return [
+                {
+                    start: firstImportLine,
+                    end: lastImportLine,
+                    kind: monaco.languages.FoldingRangeKind.Imports,
+                },
+            ];
         }
 
         return [];
@@ -205,6 +232,7 @@ export function createFoldingRangeProvider(monaco: any) {
         const ranges: languages.FoldingRange[] = [];
 
         const stack = [];
+
         for (let i = 0; i < lines.length; i++) {
             const line = lines[i];
 
@@ -215,6 +243,7 @@ export function createFoldingRangeProvider(monaco: any) {
                     stack.push(i + 1);
                 } else if (c === "}") {
                     const start = stack.pop();
+
                     if (start !== undefined && start !== i) {
                         ranges.push({ start: start, end: i });
                     }
@@ -226,9 +255,13 @@ export function createFoldingRangeProvider(monaco: any) {
     }
 
     return {
-        provideFoldingRanges: function (model: editor.ITextModel, context: languages.FoldingContext, token: CancellationToken): languages.ProviderResult<languages.FoldingRange[]> {
+        provideFoldingRanges: (
+            model: editor.ITextModel,
+        ): languages.ProviderResult<languages.FoldingRange[]> => {
             const lines = model.getLinesContent();
+
+
             return [...getImportFoldingRanges(lines), ...getBracketFoldingRanges(lines)];
-        }
+        },
     };
 }

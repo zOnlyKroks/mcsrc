@@ -1,42 +1,50 @@
-import { BehaviorSubject, combineLatest, distinctUntilChanged, from, map, Observable, switchMap, throttleTime } from "rxjs";
-import { jarIndex, type UsageKey, type UsageString } from "../workers/JarIndex";
-import { openTab } from "./Tabs";
+import {
+    BehaviorSubject,
+    distinctUntilChanged,
+    from,
+    map,
+    switchMap,
+    throttleTime,
+} from "rxjs";
+import { type UsageKey, type UsageString, jarIndex } from "../workers/JarIndex";
 import type { DecompileResult } from "./Decompiler";
+import { openTab } from "./Tabs";
 import type { Token } from "./Tokens";
 
 export const usageQuery = new BehaviorSubject("");
 
-export const useageResults = usageQuery
-    .pipe(
-        throttleTime(200),
-        distinctUntilChanged(),
-        switchMap((query) => {
-            if (!query) {
-                return from([[]]);
-            }
-            return jarIndex.pipe(
-                switchMap((index) => from(index.getUsage(query)))
-            );
-        })
-    );
+export const useageResults = usageQuery.pipe(
+    throttleTime(200),
+    distinctUntilChanged(),
+    switchMap((query) => {
+        if (!query) {
+            return from([[]]);
+        }
 
-export const isViewingUsages = usageQuery.pipe(
-    map((query) => query.length > 0)
+        return jarIndex.pipe(switchMap((index) => from(index.getUsage(query))));
+    })
 );
+
+export const isViewingUsages = usageQuery.pipe(map((query) => query.length > 0));
 
 // Format the usage string to be displayed by the user
 export function formatUsage(usage: UsageString): string {
     if (usage.startsWith("m:")) {
         const parts = usage.slice(2).split(":");
+
+
         return `${parts[1]}${parts[2]}`;
     }
     if (usage.startsWith("f:")) {
         const parts = usage.slice(2).split(":");
+
+
         return parts[1];
     }
     if (usage.startsWith("c:")) {
         return usage.slice(2);
     }
+
     return usage;
 }
 
@@ -49,11 +57,15 @@ export function formatUsageQuery(query: UsageKey): string {
         case "method": {
             const parts = query.split(":");
             const className = parts[0].split("/").pop() || parts[0];
+
+
             return `${className}.${parts[1]}${parts[2]}`;
         }
         case "field": {
             const parts = query.split(":");
             const className = parts[0].split("/").pop() || parts[0];
+
+
             return `${className}.${parts[1]}`;
         }
     }
@@ -62,12 +74,14 @@ export function formatUsageQuery(query: UsageKey): string {
 function getQueryType(query: UsageKey): "class" | "method" | "field" {
     if (query.includes(":")) {
         const parts = query.split(":");
+
         if (parts[2].includes("(")) {
             return "method";
-        } else {
-            return "field";
         }
+
+        return "field";
     }
+
     return "class";
 }
 
@@ -83,8 +97,9 @@ interface UsageNavigation {
 export const nextUsageNavigation = new BehaviorSubject<UsageNavigation | undefined>(undefined);
 
 export function goToUsage(query: UsageKey, usage: UsageString) {
-    const className = usage.slice(2).split(":")[0].split('$')[0];
-    openTab(className + ".class");
+    const className = usage.slice(2).split(":")[0].split("$")[0];
+
+    openTab(`${className}.class`);
 
     if (usage.startsWith("c:")) {
         // Nothing to jump to
@@ -103,8 +118,13 @@ export function getNextJumpToken(decompileResult: DecompileResult): Token | unde
 
     const { className, query, usage } = usageNavigation;
 
-    if (decompileResult.className != className + ".class") {
-        console.log("Decompile result class does not match usage navigation class", decompileResult.className, className);
+    if (decompileResult.className !== `${className}.class`) {
+        console.log(
+            "Decompile result class does not match usage navigation class",
+            decompileResult.className,
+            className
+        );
+
         return undefined;
     }
 
@@ -116,7 +136,8 @@ export function getNextJumpToken(decompileResult: DecompileResult): Token | unde
 
     let usageTokenIndex: number | null = null;
 
-    { // First find the usage token
+    {
+        // First find the usage token
         const parts = usage.slice(2).split(":");
         const classname = parts[0];
         const name = parts[1];
@@ -131,12 +152,12 @@ export function getNextJumpToken(decompileResult: DecompileResult): Token | unde
                 continue;
             }
 
-            if (token.type != expectedType) {
+            if (token.type !== expectedType) {
                 continue;
             }
 
-            if (token.className == classname && token.name == name && token.descriptor == descriptor) {
-                if (token.type == "field") {
+            if (token.className === classname && token.name === name && token.descriptor === descriptor) {
+                if (token.type === "field") {
                     // For fields, just return the usage as there is only one declaration
                     return token;
                 }
@@ -156,6 +177,7 @@ export function getNextJumpToken(decompileResult: DecompileResult): Token | unde
 
     if (!usageTokenIndex) {
         console.log("Could not find usage token for", usage);
+
         return undefined;
     }
 
@@ -169,15 +191,20 @@ export function getNextJumpToken(decompileResult: DecompileResult): Token | unde
         const token = decompileResult.tokens[i];
 
         // Special case for constructor usage
-        if (name == "<init>" && token.type == "class" && token.className == parts[0]) {
+        if (name === "<init>" && token.type === "class" && token.className === parts[0]) {
             return token;
         }
 
-        if (queryType == "method" && token.type == "method" && token.name == name && token.descriptor == descriptor) {
+        if (
+            queryType === "method" &&
+            token.type === "method" &&
+            token.name === name &&
+            token.descriptor === descriptor
+        ) {
             return token;
         }
 
-        if (queryType == "field" && token.type == "field" && token.name == name) {
+        if (queryType === "field" && token.type === "field" && token.name === name) {
             return token;
         }
     }
@@ -185,5 +212,6 @@ export function getNextJumpToken(decompileResult: DecompileResult): Token | unde
     // Give up if we reach another declaration, it means we didnt find it
     // Just return the declaration that supposedly contains the usage
     console.log("Could not find token for", query);
+
     return decompileResult.tokens[usageTokenIndex];
 }

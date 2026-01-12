@@ -1,23 +1,26 @@
-import { Tree, type TreeDataNode } from "antd";
 import { ApiOutlined, CopyrightOutlined, NumberOutlined } from "@ant-design/icons";
-import { useCallback, useMemo, type Key } from "react";
-import { ClassNode, selectedInheritanceClassName } from "../../logic/Inheritance";
-import { isEnum, isInterface } from "../../utils/Classfile";
+import { Tree, type TreeDataNode } from "antd";
+import { type Key, useCallback, useMemo } from "react";
+import { type ClassNode, selectedInheritanceClassName } from "../../logic/Inheritance";
 import { openTab } from "../../logic/Tabs";
+import { isEnum, isInterface } from "../../utils/Classfile";
 
 function getSimpleClassName(fullName: string): string {
-    const i = fullName.lastIndexOf('/');
+    const i = fullName.lastIndexOf("/");
+
+
     return i === -1 ? fullName : fullName.substring(i + 1);
 }
 
 function renderIcon(node: ClassNode) {
     if (isEnum(node.accessFlags)) return <NumberOutlined style={{ color: "#9254de" }} />;
     if (isInterface(node.accessFlags)) return <ApiOutlined style={{ color: "#73d13d" }} />;
+
     return <CopyrightOutlined style={{ color: "#597ef7" }} />;
 }
 
 function renderTitle(node: ClassNode) {
-    const fullName = node.name.replaceAll('/', '.');
+    const fullName = node.name.replaceAll("/", ".");
 
     return (
         <span>
@@ -27,7 +30,7 @@ function renderTitle(node: ClassNode) {
     );
 }
 
-function buildTreeData(root: ClassNode, selectedName: string): { nodes: TreeDataNode[]; expanded: string[]; } {
+function buildTreeData(root: ClassNode, selectedName: string): { nodes: TreeDataNode[]; expanded: string[] } {
     const visited = new Set<string>();
 
     interface WalkResult {
@@ -40,20 +43,20 @@ function buildTreeData(root: ClassNode, selectedName: string): { nodes: TreeData
         if (visited.has(node.name)) return null;
         visited.add(node.name);
 
-        const childResults = node.children
-            .map(child => walk(child))
-            .filter(child => child !== null);
+        const childResults = node.children.map((child) => walk(child)).filter((child) => child !== null);
 
         childResults.sort((a, b) => {
             if (a.expanded.length !== b.expanded.length) return b.expanded.length - a.expanded.length;
             const aName = getSimpleClassName(a.dataNode.key as string);
             const bName = getSimpleClassName(b.dataNode.key as string);
+
+
             return aName.localeCompare(bName);
         });
 
         // Expand all nodes that either have expanded children, or are the selected node.
-        const hasSelected = node.name === selectedName || childResults.some(child => child.expanded.length > 0);
-        const expanded = childResults.flatMap(child => child.expanded);
+        const hasSelected = node.name === selectedName || childResults.some((child) => child.expanded.length > 0);
+        const expanded = childResults.flatMap((child) => child.expanded);
 
         if (hasSelected && childResults.length > 0) {
             expanded.push(node.name);
@@ -63,29 +66,32 @@ function buildTreeData(root: ClassNode, selectedName: string): { nodes: TreeData
             key: node.name,
             title: renderTitle(node),
             icon: renderIcon(node),
-            children: childResults.map(child => child.dataNode)
+            children: childResults.map((child) => child.dataNode),
         };
 
         return { dataNode, expanded };
     }
 
     const result = walk(root);
+
     if (!result) return { nodes: [], expanded: [] };
 
     return {
         nodes: [result.dataNode],
-        expanded: Array.from(new Set(result.expanded))
+        expanded: Array.from(new Set(result.expanded)),
     };
 }
 
-const InheritanceTree = ({ data }: { data: ClassNode; }) => {
+const InheritanceTree = ({ data }: { data: ClassNode }) => {
     const { nodes, expanded } = useMemo(() => {
         if (!data) return { nodes: [], expanded: [] };
+
         return buildTreeData(data.getRoot(), data.name);
     }, [data]);
 
     const onSelect = useCallback((selectedKeys: Key[]) => {
         const selected = selectedKeys[0];
+
         if (!selected) return;
 
         // Convert internal class name format (e.g., "net/minecraft/ChatFormatting") to file path

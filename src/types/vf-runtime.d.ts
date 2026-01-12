@@ -1,6 +1,6 @@
 declare module "@run-slicer/vf/vf.wasm-runtime.js" {
     export function load(
-        wasmPath: string,
-        options?: { noAutoImports?: boolean; }
-    ): Promise<{ exports: { decompile: (name: string, options: any) => Promise<string>; }; }>;
+        _wasmPath: string,
+        _options?: { noAutoImports?: boolean; }
+    ): Promise<{ exports: { decompile: (_name: string, _options: any) => Promise<string>; }; }>;
 }

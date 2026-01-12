@@ -1,9 +1,11 @@
 export function getCamelCaseAcronym(str: string): string {
-    return str.replace(/[^A-Z]/g, '');
+    return str.replace(/[^A-Z]/g, "");
 }
 
 export function matchesCamelCase(className: string, query: string): boolean {
     const acronym = getCamelCaseAcronym(className);
+
+
     return acronym.toLowerCase().startsWith(query.toLowerCase());
 }
 
@@ -15,32 +17,28 @@ export function performSearch(query: string, classes: string[]): string[] {
 
     const lowerQuery = query.toLowerCase();
 
-    const results = classes
-        .filter(className => {
-            const simpleClassName = className.split('/').pop() || className;
+    return classes
+        .filter((className) => {
+            const simpleClassName = className.split("/").pop() || className;
             const lowerSimpleName = simpleClassName.toLowerCase();
 
             return lowerSimpleName.includes(lowerQuery) || matchesCamelCase(simpleClassName, query);
         })
-        .map(className => {
-            const simpleClassName = className.split('/').pop() || className;
+        .map((className) => {
+            const simpleClassName = className.split("/").pop() || className;
             const lowerSimpleName = simpleClassName.toLowerCase();
 
             let score = 0;
 
             if (lowerSimpleName === lowerQuery) {
                 score = 0;
-            }
-            else if (lowerSimpleName.startsWith(lowerQuery)) {
+            } else if (lowerSimpleName.startsWith(lowerQuery)) {
                 score = 1;
-            }
-            else if (getCamelCaseAcronym(simpleClassName).toLowerCase() === lowerQuery) {
+            } else if (getCamelCaseAcronym(simpleClassName).toLowerCase() === lowerQuery) {
                 score = 2;
-            }
-            else if (matchesCamelCase(simpleClassName, query)) {
+            } else if (matchesCamelCase(simpleClassName, query)) {
                 score = 3;
-            }
-            else {
+            } else {
                 score = 4 + lowerSimpleName.indexOf(lowerQuery);
             }
 
@@ -51,8 +49,9 @@ export function performSearch(query: string, classes: string[]): string[] {
                 return a.score - b.score;
             }
 
-            const aSimple = a.className.split('/').pop() || a.className;
-            const bSimple = b.className.split('/').pop() || b.className;
+            const aSimple = a.className.split("/").pop() || a.className;
+            const bSimple = b.className.split("/").pop() || b.className;
+
             if (aSimple.length !== bSimple.length) {
                 return aSimple.length - bSimple.length;
             }
@@ -60,9 +59,5 @@ export function performSearch(query: string, classes: string[]): string[] {
             return aSimple.localeCompare(bSimple);
         })
         .slice(0, 100)
-        .map(result => result.className);
-
-    return results;
+        .map((result) => result.className);
 }
-
-

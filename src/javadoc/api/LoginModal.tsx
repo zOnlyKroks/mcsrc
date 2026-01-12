@@ -1,25 +1,26 @@
-import { Modal, Button, Divider, message } from "antd";
 import { GithubOutlined } from "@ant-design/icons";
+import { Button, Modal, message } from "antd";
+import { useState } from "react";
+import { agreedEula } from "../../logic/Settings";
 import { IS_JAVADOC_EDITOR } from "../../site";
 import { useObservable } from "../../utils/UseObservable";
 import { javadocApi } from "./JavadocApi";
-import { useState } from "react";
-import { agreedEula } from "../../logic/Settings";
 
 const LoginModal = () => {
     if (!IS_JAVADOC_EDITOR) {
-        return (<></>);
+        return <></>;
     }
 
     const needsToLogin = useObservable(javadocApi.needsToLogin);
     const accepted = useObservable(agreedEula.observable);
     const [loading, setLoading] = useState(false);
-    const [messageApi, contextHolder] = message.useMessage();
+    const [messageApi] = message.useMessage();
 
     const handleGithubLogin = async () => {
         try {
             setLoading(true);
             const loginUrl = await javadocApi.getGithubLoginUrl();
+
             window.location.href = loginUrl;
         } catch (error) {
             console.error("Failed to get GitHub login URL:", error);
@@ -36,9 +37,7 @@ const LoginModal = () => {
             closable={false}
             maskClosable={false}
         >
-            <p style={{ marginBottom: 24 }}>
-                Please log in to access the Javadoc editor.
-            </p>
+            <p style={{ marginBottom: 24 }}>Please log in to access the Javadoc editor.</p>
 
             <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
                 <Button

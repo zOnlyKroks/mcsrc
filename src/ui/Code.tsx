@@ -1,37 +1,33 @@
-import Editor, { useMonaco } from '@monaco-editor/react';
-import { useObservable } from '../utils/UseObservable';
-import { currentResult, type DecompileResult, isDecompiling } from '../logic/Decompiler';
-import { useEffect, useRef, useState } from 'react';
-import { editor, Range } from "monaco-editor";
-import { isThin } from '../logic/Browser';
-import { classesList } from '../logic/JarFile';
-import { activeTabKey, getOpenTab, openTabs, tabHistory } from '../logic/Tabs';
-import { message, Spin } from 'antd';
-import { LoadingOutlined } from '@ant-design/icons';
-import { setSelectedFile, state } from '../logic/State';
-import { getTokenLocation } from '../logic/Tokens';
+import { LoadingOutlined } from "@ant-design/icons";
+import Editor, { useMonaco } from "@monaco-editor/react";
+import { Spin, message } from "antd";
+import { Range, editor } from "monaco-editor";
+import { useEffect, useRef, useState } from "react";
 import { pairwise, startWith } from "rxjs";
-import { getNextJumpToken, nextUsageNavigation, usageQuery } from '../logic/FindUsages';
-import { setupJavaBytecodeLanguage } from '../utils/JavaBytecode';
-import { IS_JAVADOC_EDITOR } from '../site';
-import { applyJavadocCodeExtensions } from '../javadoc/JavadocCodeExtensions';
-import { selectedInheritanceClassName } from '../logic/Inheritance';
-import { createHoverProvider } from './CodeHoverProvider';
-import { findTokenAtPosition } from './CodeUtils';
+import { applyJavadocCodeExtensions } from "../javadoc/JavadocCodeExtensions";
+import { isThin } from "../logic/Browser";
+import { currentResult, isDecompiling } from "../logic/Decompiler";
+import { diffView } from "../logic/Diff";
+import { getNextJumpToken, nextUsageNavigation, usageQuery } from "../logic/FindUsages";
+import { selectedInheritanceClassName } from "../logic/Inheritance";
+import { classesList } from "../logic/JarFile";
+import { bytecode } from "../logic/Settings";
+import { setSelectedFile, state } from "../logic/State";
+import { activeTabKey, getOpenTab, openTabs, tabHistory } from "../logic/Tabs";
+import { getTokenLocation } from "../logic/Tokens";
+import { IS_JAVADOC_EDITOR } from "../site";
+import { setupJavaBytecodeLanguage } from "../utils/JavaBytecode";
+import { useObservable } from "../utils/UseObservable";
 import {
     IS_DEFINITION_CONTEXT_KEY_NAME,
     createCopyAwAction,
     createCopyMixinAction,
     createFindUsagesAction,
-    createViewInheritanceAction
-} from './CodeContextActions';
-import {
-    createDefinitionProvider,
-    createEditorOpener,
-    createFoldingRangeProvider
-} from './CodeExtensions';
-import { diffView } from '../logic/Diff';
-import { bytecode } from '../logic/Settings';
+    createViewInheritanceAction,
+} from "./CodeContextActions";
+import { createDefinitionProvider, createEditorOpener, createFoldingRangeProvider } from "./CodeExtensions";
+import { createHoverProvider } from "./CodeHoverProvider";
+import { findTokenAtPosition } from "./CodeUtils";
 
 const Code = () => {
     const monaco = useMonaco();
@@ -58,7 +54,7 @@ const Code = () => {
 
         // Reapply token decorations for the current tab
         if (editorRef.current && decompileResult.tokens) {
-            const decorations = decompileResult.tokens.map(token => {
+            const decorations = decompileResult.tokens.map((token) => {
                 const startPos = model.getPositionAt(token.start);
                 const endPos = model.getPositionAt(token.start + token.length);
                 const canGoTo = !token.declaration && classList && classList.includes(token.className + ".class");
@@ -66,8 +62,8 @@ const Code = () => {
                 return {
                     range: new Range(startPos.lineNumber, startPos.column, endPos.lineNumber, endPos.column),
                     options: {
-                        inlineClassName: token.type + '-token-decoration' + (canGoTo ? "-pointer" : "")
-                    }
+                        inlineClassName: token.type + "-token-decoration" + (canGoTo ? "-pointer" : ""),
+                    },
                 };
             });
 
@@ -85,7 +81,6 @@ const Code = () => {
     useEffect(() => {
         if (!monaco) return;
         if (!editorRef.current) return;
-        const editor = editorRef.current;
 
         const definitionProvider = monaco.languages.registerDefinitionProvider(
             "java",
@@ -97,18 +92,11 @@ const Code = () => {
             createHoverProvider(editorRef, decompileResultRef, classListRef)
         );
 
-        const editorOpener = monaco.editor.registerEditorOpener(
-            createEditorOpener(decompileResultRef)
-        );
+        const editorOpener = monaco.editor.registerEditorOpener(createEditorOpener(decompileResultRef));
 
-        const foldingRange = monaco.languages.registerFoldingRangeProvider(
-            "java",
-            createFoldingRangeProvider(monaco)
-        );
+        const foldingRange = monaco.languages.registerFoldingRangeProvider("java", createFoldingRangeProvider(monaco));
 
-        const copyAw = monaco.editor.addEditorAction(
-            createCopyAwAction(decompileResultRef, classListRef, messageApi)
-        );
+        const copyAw = monaco.editor.addEditorAction(createCopyAwAction(decompileResultRef, classListRef, messageApi));
 
         const copyMixin = monaco.editor.addEditorAction(
             createCopyMixinAction(decompileResultRef, classListRef, messageApi)
@@ -119,7 +107,9 @@ const Code = () => {
         );
 
         const viewInheritance = monaco.editor.addEditorAction(
-            createViewInheritanceAction(decompileResultRef, messageApi, (value) => selectedInheritanceClassName.next(value))
+            createViewInheritanceAction(decompileResultRef, messageApi, (value) =>
+                selectedInheritanceClassName.next(value)
+            )
         );
 
         const bytecode = setupJavaBytecodeLanguage(monaco);
@@ -154,8 +144,9 @@ const Code = () => {
     useEffect(() => {
         if (editorRef.current && decompileResult) {
             const editor = editorRef.current;
-            const currentTab = openTabs.value.find(tab => tab.key === activeTabKey.value);
-            const prevTab = openTabs.value.find(tab => tab.key === tabHistory.value.at(-2));
+            const currentTab = openTabs.value.find((tab) => tab.key === activeTabKey.value);
+            const prevTab = openTabs.value.find((tab) => tab.key === tabHistory.value.at(-2));
+
             if (prevTab) {
                 prevTab.scroll = editor.getScrollTop();
             }
@@ -164,20 +155,24 @@ const Code = () => {
 
             const executeScroll = () => {
                 const currentLine = state.value?.line;
+
                 if (currentLine) {
                     const lineEnd = state.value?.lineEnd ?? currentLine;
+
                     editor.setSelection(new Range(currentLine, 1, currentLine, 1));
                     editor.revealLinesInCenterIfOutsideViewport(currentLine, lineEnd);
 
                     // Highlight the line range
-                    lineHighlightRef.current = editor.createDecorationsCollection([{
-                        range: new Range(currentLine, 1, lineEnd, 1),
-                        options: {
-                            isWholeLine: true,
-                            className: 'highlighted-line',
-                            glyphMarginClassName: 'highlighted-line-glyph'
-                        }
-                    }]);
+                    lineHighlightRef.current = editor.createDecorationsCollection([
+                        {
+                            range: new Range(currentLine, 1, lineEnd, 1),
+                            options: {
+                                isWholeLine: true,
+                                className: "highlighted-line",
+                                glyphMarginClassName: "highlighted-line-glyph",
+                            },
+                        },
+                    ]);
                 } else if (currentTab && currentTab.scroll > 0) {
                     editor.setScrollTop(currentTab.scroll);
                 } else {
@@ -207,6 +202,7 @@ const Code = () => {
 
                 if (nextJumpLocation) {
                     const { line, column, length } = nextJumpLocation;
+
                     editor.revealLinesInCenterIfOutsideViewport(line, line);
                     editor.setSelection(new Range(line, column, line, column + length));
                 }
@@ -220,27 +216,20 @@ const Code = () => {
 
     // Subscribe to tab changes and store model & viewstate of previously opened tab
     useEffect(() => {
-        const sub = activeTabKey.pipe(
-            startWith(activeTabKey.value),
-            pairwise()
-        ).subscribe(([prev, curr]) => {
+        const sub = activeTabKey.pipe(startWith(activeTabKey.value), pairwise()).subscribe(([prev, curr]) => {
             if (prev === curr) return;
 
-            const previousTab = openTabs.getValue().find(o => o.key === prev);
-            previousTab?.cacheView(
-                editorRef.current?.saveViewState() || null,
-                editorRef.current?.getModel() || null
-            );
+            const previousTab = openTabs.getValue().find((o) => o.key === prev);
+
+            previousTab?.cacheView(editorRef.current?.saveViewState() || null, editorRef.current?.getModel() || null);
         });
 
         // Cache if diffview is opened and restore if it is closed;
         const sub2 = diffView.subscribe((open) => {
             const openTab = getOpenTab();
+
             if (open) {
-                openTab?.cacheView(
-                    editorRef.current?.saveViewState() || null,
-                    editorRef.current?.getModel() || null
-                );
+                openTab?.cacheView(editorRef.current?.saveViewState() || null, editorRef.current?.getModel() || null);
             } else {
                 if (!openTab) return;
                 setSelectedFile(openTab.key);
@@ -266,11 +255,12 @@ const Code = () => {
         if (!monaco || !decompileResult) return;
 
         const tab = getOpenTab();
+
         if (!tab) return;
         const lang = bytecode.value ? "bytecode" : "java";
 
         // Create new model with the current decompilation source
-        let newModel = monaco.editor.createModel(
+        const newModel = monaco.editor.createModel(
             decompileResult.source,
             lang,
             monaco.Uri.parse(`inmemory://${Date.now()}`)
@@ -306,8 +296,8 @@ const Code = () => {
             spinning={!!decompiling}
             tip="Decompiling..."
             style={{
-                height: '100%',
-                color: 'white'
+                height: "100%",
+                color: "white",
             }}
         >
             {contextHolder}
@@ -323,27 +313,36 @@ const Code = () => {
                     minimap: { enabled: !hideMinimap },
                     glyphMargin: true,
                     foldingImportsByDefault: true,
-                    foldingHighlight: false
+                    foldingHighlight: false,
                 }}
                 onMount={(codeEditor) => {
                     editorRef.current = codeEditor;
 
                     // Update context key when cursor position changes
                     // We use this to know when to show the options to copy AW/Mixin strings
-                    const isDefinitionContextKey = codeEditor.createContextKey<boolean>(IS_DEFINITION_CONTEXT_KEY_NAME, false);
-                    codeEditor.onDidChangeCursorPosition((e) => {
+                    const isDefinitionContextKey = codeEditor.createContextKey<boolean>(
+                        IS_DEFINITION_CONTEXT_KEY_NAME,
+                        false
+                    );
+
+                    codeEditor.onDidChangeCursorPosition((_) => {
                         const token = findTokenAtPosition(codeEditor, decompileResultRef.current, classListRef.current);
-                        const validToken = token != null && (token.type == "class" || token.type == "method" || token.type == "field");
+                        const validToken =
+                            token != null && (token.type == "class" || token.type == "method" || token.type == "field");
+
                         isDefinitionContextKey.set(validToken);
                     });
 
                     // Handle gutter clicks for line linking
                     codeEditor.onMouseDown((e) => {
-                        if (e.target.type === editor.MouseTargetType.GUTTER_LINE_NUMBERS ||
-                            e.target.type === editor.MouseTargetType.GUTTER_GLYPH_MARGIN) {
+                        if (
+                            e.target.type === editor.MouseTargetType.GUTTER_LINE_NUMBERS ||
+                            e.target.type === editor.MouseTargetType.GUTTER_GLYPH_MARGIN
+                        ) {
                             const lineNumber = e.target.position?.lineNumber;
 
                             const currentState = state.value;
+
                             if (lineNumber && currentState) {
                                 // Shift-click to select a range
                                 if (e.event.shiftKey && currentState.line) {
@@ -354,7 +353,8 @@ const Code = () => {
                             }
                         }
                     });
-                }} />
+                }}
+            />
         </Spin>
     );
 };

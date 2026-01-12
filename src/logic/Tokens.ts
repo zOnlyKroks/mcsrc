@@ -1,6 +1,6 @@
 import type { DecompileResult } from "./Decompiler";
 
-export type TokenType = 'class' | 'field' | 'method' | 'parameter' | 'local';
+export type TokenType = "class" | "field" | "method" | "parameter" | "local";
 
 interface BaseToken {
     // The number of characters from the start of the source
@@ -14,7 +14,7 @@ interface BaseToken {
 }
 
 export interface MemberToken extends BaseToken {
-    type: 'field' | 'method';
+    type: "field" | "method";
     // The member name
     name: string;
     // The member descriptor
@@ -22,13 +22,13 @@ export interface MemberToken extends BaseToken {
 }
 
 interface NonMethodToken extends BaseToken {
-    type: 'class' | 'parameter' | 'local';
+    type: "class" | "parameter" | "local";
 }
 
 export type Token = MemberToken | NonMethodToken;
 
 export interface TokenLocation {
-    line: number,
+    line: number;
     column: number;
     length: number;
 }
@@ -37,5 +37,7 @@ export function getTokenLocation(result: DecompileResult, token: Token): TokenLo
     const sourceUpTo = result.source.slice(0, token.start);
     const line = sourceUpTo.match(/\n/g)!.length + 1;
     const column = sourceUpTo.length - sourceUpTo.lastIndexOf("\n");
+
+
     return { line, column, length: token.length };
 }

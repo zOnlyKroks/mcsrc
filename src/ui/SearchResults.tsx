@@ -1,7 +1,7 @@
 import { List } from "antd";
 import { searchResults } from "../logic/JarFile";
-import { useObservable } from "../utils/UseObservable";
 import { openTab } from "../logic/Tabs";
+import { useObservable } from "../utils/UseObservable";
 
 const SearchResults = () => {
     const results = useObservable(searchResults);
@@ -17,12 +17,12 @@ const SearchResults = () => {
                         cursor: "pointer",
                         padding: "2px 8px",
                         fontSize: "12px",
-                        transition: "background-color 0.2s"
+                        transition: "background-color 0.2s",
                     }}
-                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)'}
-                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                    onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "rgba(255, 255, 255, 0.1)")}
+                    onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
                 >
-                    {item.replace(/\.class$/, '')}
+                    {item.replace(/\.class$/, "")}
                 </List.Item>
             )}
         />
