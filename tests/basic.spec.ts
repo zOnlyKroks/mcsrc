@@ -7,7 +7,8 @@ async function waitForDecompiledContent(page: Page, expectedText: string) {
         await expect(decompiling).toBeHidden();
     }).toPass({ timeout: 30000 });
 
-    const editor = page.getByRole("code").nth(0);
+    // Use a more specific selector to get only the code content, not line numbers
+    const editor = page.locator(".monaco-editor .view-lines");
 
     await expect(editor).toContainText(expectedText, { timeout: 30000 });
 }
