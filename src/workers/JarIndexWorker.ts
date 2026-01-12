@@ -18,9 +18,9 @@ let indexerFunc: Indexer | null = null;
 const getIndexer = async (): Promise<Indexer> => {
     if (!indexerFunc) {
         try {
-            const teavm = await load(indexerWasm);
+            const teavm = (await load(indexerWasm)) as unknown as { exports: Indexer; };
 
-            indexerFunc = teavm.exports as Indexer;
+            indexerFunc = teavm.exports;
         } catch (e) {
             console.warn("Failed to load WASM module (non-compliant browser?), falling back to JS implementation", e);
             indexerFunc = (await import("../../java/build/generated/teavm/js/java.js")) as unknown as Indexer;

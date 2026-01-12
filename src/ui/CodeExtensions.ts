@@ -1,5 +1,6 @@
 import type { IDisposable, IPosition, languages } from "monaco-editor";
 import { Range, Uri, type editor } from "monaco-editor";
+import type * as Monaco from "monaco-editor";
 import { filter, take } from "rxjs";
 import type { DecompileResult } from "../logic/Decompiler";
 import { currentResult } from "../logic/Decompiler";
@@ -169,7 +170,7 @@ export function createEditorOpener(decompileResultRef: { current: DecompileResul
     };
 }
 
-export function createFoldingRangeProvider(monaco: any) {
+export function createFoldingRangeProvider(monaco: typeof Monaco) {
     function getImportFoldingRanges(lines: string[]) {
         let packageLine: number | null = null;
         let firstImportLine: number | null = null;

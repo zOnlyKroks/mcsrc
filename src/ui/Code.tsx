@@ -2,7 +2,7 @@ import { LoadingOutlined } from "@ant-design/icons";
 import Editor, { useMonaco } from "@monaco-editor/react";
 import { Spin, message } from "antd";
 import { Range, editor } from "monaco-editor";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { pairwise, startWith } from "rxjs";
 import { applyJavadocCodeExtensions } from "../javadoc/JavadocCodeExtensions";
 import { isThin } from "../logic/Browser";
@@ -49,7 +49,7 @@ const Code = () => {
 
     const [resetViewTrigger, setResetViewTrigger] = useState(false);
 
-    function applyTokenDecorations(model: editor.ITextModel) {
+    const applyTokenDecorations = useCallback((model: editor.ITextModel) => {
         if (!decompileResult) return;
 
         // Reapply token decorations for the current tab
@@ -70,7 +70,7 @@ const Code = () => {
             decorationsCollectionRef.current?.clear();
             decorationsCollectionRef.current = editorRef.current.createDecorationsCollection(decorations);
         }
-    }
+    }, [decompileResult, classList]);
 
     // Keep refs updated
     useEffect(() => {
@@ -126,19 +126,17 @@ const Code = () => {
             hoverProvider.dispose();
             definitionProvider.dispose();
         };
-    }, [monaco, decompileResult, classList, resetViewTrigger]);
+    }, [monaco, decompileResult, classList, resetViewTrigger, messageApi]);
 
-    if (IS_JAVADOC_EDITOR) {
-        useEffect(() => {
-            if (!monaco || !editorRef.current || !decompileResult) return;
+    useEffect(() => {
+        if (!IS_JAVADOC_EDITOR || !monaco || !editorRef.current || !decompileResult) return;
 
-            const extensions = applyJavadocCodeExtensions(monaco, editorRef.current, decompileResult);
+        const extensions = applyJavadocCodeExtensions(monaco, editorRef.current, decompileResult);
 
-            return () => {
-                extensions.dispose();
-            };
-        }, [monaco, editorRef.current, decompileResult]);
-    }
+        return () => {
+            extensions.dispose();
+        };
+    }, [monaco, decompileResult]);
 
     // Scroll to top when source changes, or to specific line if specified
     useEffect(() => {
@@ -247,7 +245,7 @@ const Code = () => {
             sub.unsubscribe();
             sub2.unsubscribe();
         };
-    }, []);
+    }, [resetViewTrigger]);
 
     // Handles setting the model and viewstate of the editor
     useEffect(() => {
@@ -287,7 +285,7 @@ const Code = () => {
             }
         }
         applyTokenDecorations(tab.model!);
-    }, [decompileResult, resetViewTrigger]);
+    }, [decompileResult, resetViewTrigger, applyTokenDecorations, monaco]);
 
     return (
         <Spin

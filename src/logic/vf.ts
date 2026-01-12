@@ -69,5 +69,5 @@ export const decompile = async (name: string, options: Config) => {
         }
     }
 
-    return decompileFunc!(name, options);
+    return decompileFunc(name, options);
 };

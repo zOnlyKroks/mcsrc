@@ -48,16 +48,16 @@ const ModalBody = ({ token, onValueChange }: { token: Token; onValueChange: (_va
 };
 
 const JavadocModal = () => {
-    if (!IS_JAVADOC_EDITOR) {
-        return <></>;
-    }
-
     const token = useObservable(activeJavadocToken);
     const minecraftVersion = useObservable(selectedMinecraftVersion);
     const [currentValue, setCurrentValue] = useState<string | undefined>();
     const [loading, setLoading] = useState(false);
 
     const [messageApi] = message.useMessage();
+
+    if (!IS_JAVADOC_EDITOR) {
+        return <></>;
+    }
 
     const handleSave = async () => {
         if (!token) {
@@ -118,7 +118,7 @@ const JavadocModal = () => {
                     <Button onClick={handleCancel} disabled={loading}>
                         Cancel
                     </Button>
-                    <Button type="primary" onClick={handleSave} loading={loading}>
+                    <Button type="primary" onClick={() => void handleSave()} loading={loading}>
                         Save
                     </Button>
                 </div>

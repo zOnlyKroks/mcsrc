@@ -189,7 +189,7 @@ const InheritanceGraphInner = ({ data }: { data: ClassNode }) => {
             const selectedNode = getNode(data.name);
 
             if (selectedNode) {
-                setCenter(selectedNode.position.x + 100, selectedNode.position.y + 25, { zoom: 1, duration: 300 });
+                void setCenter(selectedNode.position.x + 100, selectedNode.position.y + 25, { zoom: 1, duration: 300 });
             }
         }, 0);
 

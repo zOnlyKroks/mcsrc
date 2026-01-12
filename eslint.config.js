@@ -1,103 +1,97 @@
-import eslint from '@eslint/js';
-import tseslint from '@typescript-eslint/eslint-plugin';
-import parser from '@typescript-eslint/parser';
+// eslint.config.js
+import js from "@eslint/js";
+import tseslint from "typescript-eslint";
+import react from "eslint-plugin-react";
+import reactHooks from "eslint-plugin-react-hooks";
+import globals from "globals";
 
 export default [
-    eslint.configs.recommended,
+    // Base JS rules
+    js.configs.recommended,
+
+    // TypeScript (type-aware)
+    ...tseslint.configs.recommendedTypeChecked,
+
     {
-        files: ['**/*.{js,ts,jsx,tsx}'],
+        files: ["**/*.{js,ts,jsx,tsx}"],
+
         languageOptions: {
-            parser: parser,
+            ecmaVersion: 2022,
+            sourceType: "module",
             parserOptions: {
-                ecmaVersion: 2022,
-                sourceType: 'module',
+                projectService: {
+                    // MUST be narrow – no **
+                    allowDefaultProject: [
+                        "tests/*.spec.ts",
+                        "tests/*.spec.tsx",
+                        "playwright.config.ts",
+                    ],
+                },
+                tsconfigRootDir: import.meta.dirname,
             },
             globals: {
-                console: 'readonly',
-                process: 'readonly',
-                Buffer: 'readonly',
-                window: 'readonly',
-                document: 'readonly',
-                navigator: 'readonly',
-                localStorage: 'readonly',
-                sessionStorage: 'readonly',
-            }
+                ...globals.browser,
+                ...globals.node,
+            },
         },
+
         plugins: {
-            '@typescript-eslint': tseslint,
+            react,
+            "react-hooks": reactHooks,
         },
+
+        settings: {
+            react: {
+                version: "detect",
+            },
+        },
+
         rules: {
-            // Strict indentation and whitespace rules
-            'indent': ['error', 4, {
-                'SwitchCase': 1,
-                'VariableDeclarator': 1,
-                'outerIIFEBody': 1,
-                'MemberExpression': 1,
-                'FunctionDeclaration': { 'parameters': 1, 'body': 1 },
-                'FunctionExpression': { 'parameters': 1, 'body': 1 },
-                'CallExpression': { 'arguments': 1 },
-                'ArrayExpression': 1,
-                'ObjectExpression': 1,
-                'ImportDeclaration': 1,
-                'flatTernaryExpressions': false,
-                'ignoreComments': false
-            }],
-            'no-mixed-spaces-and-tabs': 'error',
-            'no-trailing-spaces': 'error',
-            'no-multiple-empty-lines': ['error', { 'max': 2, 'maxEOF': 1, 'maxBOF': 0 }],
-            'eol-last': ['error', 'always'],
-            'space-before-blocks': 'error',
-            'space-infix-ops': 'error',
-            'space-unary-ops': 'error',
-            'space-before-function-paren': ['error', {
-                'anonymous': 'always',
-                'named': 'never',
-                'asyncArrow': 'always'
-            }],
-            'keyword-spacing': 'error',
-            'comma-spacing': ['error', { 'before': false, 'after': true }],
-            'array-bracket-spacing': ['error', 'never'],
-            'object-curly-spacing': ['error', 'always'],
-            'semi-spacing': ['error', { 'before': false, 'after': true }],
-            'key-spacing': ['error', { 'beforeColon': false, 'afterColon': true }],
-            'block-spacing': 'error',
-            'computed-property-spacing': ['error', 'never'],
+            // React
+            "react/react-in-jsx-scope": "off",
+            "react/jsx-uses-react": "off",
+            "react/prop-types": "off",
 
-            // Line break rules
-            'brace-style': ['error', '1tbs', { 'allowSingleLine': true }],
-            'newline-before-return': 'error',
-            'padding-line-between-statements': [
-                'error',
-                { 'blankLine': 'always', 'prev': ['const', 'let', 'var'], 'next': '*' },
-                { 'blankLine': 'any', 'prev': ['const', 'let', 'var'], 'next': ['const', 'let', 'var'] }
+            "react-hooks/rules-of-hooks": "error",
+            "react-hooks/exhaustive-deps": "warn",
+
+            // TypeScript
+            "no-unused-vars": "off",
+            "@typescript-eslint/no-unused-vars": [
+                "error",
+                { argsIgnorePattern: "^_" },
             ],
+            "@typescript-eslint/no-explicit-any": "warn",
+            "@typescript-eslint/consistent-type-imports": "error",
 
-            // Semicolons and quotes
-            'semi': ['error', 'always'],
-            'quotes': ['error', 'double', { 'allowTemplateLiterals': true }],
-
-            // General code quality
-            'no-console': 'off',
-            'prefer-const': 'error',
-            'no-var': 'error',
-            'no-unused-vars': ['error', { 'argsIgnorePattern': '^_' }],
-
-            // Disable some rules that conflict with TypeScript
-            'no-undef': 'off',
-        }
+            // General
+            "no-console": "off",
+            "prefer-const": "error",
+            "no-var": "error",
+        },
     },
+
+    // Playwright test-specific overrides
+    {
+        files: ["tests/*.spec.ts", "tests/*.spec.tsx"],
+        rules: {
+            "@typescript-eslint/no-floating-promises": "off",
+        },
+    },
+
+    // Ignore outputs and configs
     {
         ignores: [
-            'node_modules/',
-            'dist/',
-            'build/',
-            'java/',
-            'playwright-report/',
-            'test-results/',
-            '*.config.js',
-            '*.config.ts',
-            'vite.config.ts',
-            'playwright.config.ts'
-        ]
-    }
+            "node_modules/",
+            "dist/",
+            "build/",
+            "java/",
+            "playwright-report/",
+            "test-results/",
+            "*.config.js",
+            "*.config.ts",
+            "vite.config.ts",
+            "playwright.config.ts",
+        ],
+    },
 ];

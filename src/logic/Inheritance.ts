@@ -13,13 +13,16 @@ export class ClassNode {
     }
 
     getRoot(): ClassNode {
-        let n: ClassNode = this;
-
-        while (n.parents.length > 0) {
-            n = n.parents[0];
+        if (this.parents.length === 0) {
+            return this;
         }
 
-        return n;
+        let current = this.parents[0];
+        while (current.parents.length > 0) {
+            current = current.parents[0];
+        }
+
+        return current;
     }
 }
 

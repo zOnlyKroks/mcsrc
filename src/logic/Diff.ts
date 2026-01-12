@@ -1,4 +1,4 @@
-import { BehaviorSubject, type Observable, combineLatest, from, map, switchMap } from "rxjs";
+import { BehaviorSubject, type Observable, combineLatest, map } from "rxjs";
 import { type DecompileResult, currentResult, decompileResultPipeline } from "./Decompiler";
 import { type MinecraftJar, minecraftJar, minecraftJarPipeline, selectedMinecraftVersion } from "./MinecraftApi";
 
@@ -26,7 +26,7 @@ export function getLeftDiff(): DiffSide {
         leftDiff = {} as DiffSide;
         leftDiff.selectedVersion = new BehaviorSubject<string | null>(null);
         leftDiff.jar = minecraftJarPipeline(leftDiff.selectedVersion);
-        leftDiff.entries = leftDiff.jar.pipe(switchMap((jar) => from(getEntriesWithCRC(jar))));
+        leftDiff.entries = leftDiff.jar.pipe(map((jar) => getEntriesWithCRC(jar)));
         leftDiff.result = decompileResultPipeline(leftDiff.jar);
     }
 
@@ -40,7 +40,7 @@ export function getRightDiff(): DiffSide {
         rightDiff = {
             selectedVersion: selectedMinecraftVersion,
             jar: minecraftJar,
-            entries: minecraftJar.pipe(switchMap((jar) => from(getEntriesWithCRC(jar)))),
+            entries: minecraftJar.pipe(map((jar) => getEntriesWithCRC(jar))),
             result: currentResult,
         };
     }
@@ -64,7 +64,7 @@ export function getDiffChanges(): Observable<Map<string, ChangeState>> {
 
 export type ChangeState = "added" | "deleted" | "modified";
 
-async function getEntriesWithCRC(jar: MinecraftJar): Promise<Map<string, EntryInfo>> {
+function getEntriesWithCRC(jar: MinecraftJar): Map<string, EntryInfo> {
     const entries = new Map<string, EntryInfo>();
 
     for (const [path, file] of Object.entries(jar.jar.entries)) {

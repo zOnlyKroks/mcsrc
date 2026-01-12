@@ -2,11 +2,7 @@ import { BehaviorSubject, type Observable, combineLatest, map } from "rxjs";
 
 export type ModifierKey = "Ctrl" | "Alt" | "Shift";
 export type Key = string;
-export type KeybindValue =
-    | Key
-    | `${ModifierKey}+${Key}`
-    | `${ModifierKey}+${ModifierKey}+${Key}`
-    | `${ModifierKey}+${ModifierKey}+${ModifierKey}+${Key}`;
+export type KeybindValue = string;
 
 export class BooleanSetting {
     private readonly key: string;

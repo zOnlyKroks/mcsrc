@@ -42,7 +42,7 @@ class BlobReader implements Reader {
     }
 
     async length(): Promise<number> {
-        return this.blob.size;
+        return Promise.resolve(this.blob.size);
     }
 
     async read(offset: number, size: number): Promise<Uint8Array> {
@@ -54,7 +54,7 @@ class BlobReader implements Reader {
     }
 
     async slice(offset: number, size: number): Promise<Blob> {
-        return this.blob.slice(offset, offset + size);
+        return Promise.resolve(this.blob.slice(offset, offset + size));
     }
 }
 

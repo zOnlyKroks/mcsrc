@@ -1,4 +1,5 @@
-import { type CancellationToken, type IDisposable, editor, type languages } from "monaco-editor";
+import type { editor } from "monaco-editor";
+import { type CancellationToken, type IDisposable, type languages } from "monaco-editor";
 import type { DecompileResult } from "../logic/Decompiler";
 import { type Token, getTokenLocation } from "../logic/Tokens";
 import {
@@ -8,12 +9,12 @@ import {
     refreshJavadocDataForClass,
 } from "./Javadoc";
 
-type monaco = typeof import("monaco-editor");
+import type * as MonacoType from "monaco-editor";
 
 const EDIT_JAVADOC_COMMAND_ID = "editor.action.editJavadoc";
 
 export function applyJavadocCodeExtensions(
-    monaco: monaco,
+    monaco: typeof MonacoType,
     editor: editor.IStandaloneCodeEditor,
     decompile: DecompileResult
 ): IDisposable {
@@ -93,7 +94,7 @@ export function applyJavadocCodeExtensions(
         id: EDIT_JAVADOC_COMMAND_ID,
         label: "Edit Javadoc",
         run: (editor, ...args) => {
-            const token: Token = args[0];
+            const token = args[0] as Token;
 
             activeJavadocToken.next(token);
         },

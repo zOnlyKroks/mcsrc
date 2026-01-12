@@ -20,8 +20,7 @@ class JavadocApi {
             throw new Error("Failed to get GitHub login URL");
         }
 
-        const data = await response.json();
-
+        const data = await response.json() as { url: string };
 
         return data.url;
     }
@@ -114,7 +113,7 @@ class JavadocApi {
             throw new Error("Failed to refresh access token");
         }
 
-        const data = await response.json();
+        const data = await response.json() as { accessToken: string };
 
         this.accessToken.next(data.accessToken);
     }

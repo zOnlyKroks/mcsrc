@@ -16,8 +16,8 @@ const sortTreeNodes = (nodes: TreeDataNode[] = []) => {
         const bHas = !!(b.children && b.children.length);
 
         if (aHas !== bHas) return aHas ? -1 : 1;
-        const aTitle = String(a.title).toLowerCase();
-        const bTitle = String(b.title).toLowerCase();
+        const aTitle = (a.title as string).toLowerCase();
+        const bTitle = (b.title as string).toLowerCase();
 
 
         return aTitle.localeCompare(bTitle);
@@ -102,7 +102,7 @@ const FileList = () => {
             treeData={treeData}
             expandedKeys={[...(expandedKeys || [])]}
             onExpand={setExpandedKeys}
-            titleRender={(nodeData) => <span style={{ userSelect: "none" }}>{nodeData.title?.toString()}</span>}
+            titleRender={(nodeData) => <span style={{ userSelect: "none" }}>{nodeData.title as string}</span>}
         />
     );
 };

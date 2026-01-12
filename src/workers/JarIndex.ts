@@ -3,9 +3,9 @@ import { type MinecraftJar, minecraftJar } from "../logic/MinecraftApi";
 import type { ClassDataString } from "./JarIndexWorker";
 
 export type Class = string;
-export type Method = `${string}:${string}:${string}`;
-export type Field = `${string}:${string}:${string}`;
-export type UsageKey = Class | Method | Field;
+export type Method = string;
+export type Field = string;
+export type UsageKey = string;
 
 export type UsageString = `c:${Class}` | `m:${Method}` | `f:${Field}`;
 
@@ -28,7 +28,13 @@ export function parseClassData(data: ClassDataString): ClassData {
     };
 }
 
-type JarIndexWorker = typeof import("./JarIndexWorker");
+export interface JarIndexWorker {
+    index(buffer: ArrayBuffer): Promise<void>;
+    getUsageSize(): number;
+    getUsage(key: UsageKey): Promise<UsageString[]>;
+    getClassData(): Promise<ClassDataString[]>;
+    getBytecode(classData: ArrayBufferLike[]): Promise<string>;
+}
 
 // Percent complete is total >= 0
 export const indexProgress = new BehaviorSubject<number>(-1);

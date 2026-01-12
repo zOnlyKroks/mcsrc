@@ -57,7 +57,7 @@ export function minecraftJarPipeline(source$: Observable<string | null>): Observ
         filter((id) => id !== null),
         distinctUntilChanged(),
         tap((_version) => updateSelectedMinecraftVersion()),
-        map((version) => getVersionEntryById(version!)!),
+        map((version) => getVersionEntryById(version)!),
         tap((version) => console.log(`Opening Minecraft jar ${version.id}`)),
         switchMap((version) => from(downloadMinecraftJar(version, downloadProgress))),
         shareReplay({ bufferSize: 1, refCount: false })
@@ -72,7 +72,7 @@ async function getJson<T>(url: string): Promise<T> {
         throw new Error(`Failed to fetch JSON from ${url}: ${response.statusText}`);
     }
 
-    return response.json();
+    return response.json() as Promise<T>;
 }
 
 async function fetchVersions(): Promise<VersionsList> {
@@ -122,7 +122,7 @@ async function cachedFetch(url: string): Promise<Response> {
     const response = await fetch(url);
 
     if (response.ok) {
-        cache.put(url, response.clone());
+        void cache.put(url, response.clone());
     }
 
     return response;
@@ -201,7 +201,7 @@ let hasInitialized = false;
 combineLatest([agreedEula.observable, state]).subscribe(([agreed, currentState]) => {
     if (agreed && !hasInitialized) {
         hasInitialized = true;
-        initialize(currentState.minecraftVersion);
+        void initialize(currentState.minecraftVersion);
     }
 });
 

@@ -18,6 +18,7 @@ export function createCopyAwAction(
         label: "Copy Class Tweaker / Access Widener",
         contextMenuGroupId: "9_cutcopypaste",
         precondition: IS_DEFINITION_CONTEXT_KEY_NAME,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         run: async (editor: editor.ICodeEditor, ..._args: any[]): Promise<void> => {
             const token = findTokenAtPosition(editor, decompileResultRef.current, classListRef.current);
 
@@ -58,6 +59,7 @@ export function createCopyMixinAction(
         label: "Copy Mixin Target",
         contextMenuGroupId: "9_cutcopypaste",
         precondition: IS_DEFINITION_CONTEXT_KEY_NAME,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         run: async (editor: editor.ICodeEditor, ..._args: any[]): Promise<void> => {
             const token = findTokenAtPosition(editor, decompileResultRef.current, classListRef.current);
 
@@ -100,7 +102,8 @@ export function createFindUsagesAction(
         contextMenuGroupId: "navigation",
         contextMenuOrder: 1,
         precondition: IS_DEFINITION_CONTEXT_KEY_NAME,
-        run: async (editor: editor.ICodeEditor, ..._args: any[]): Promise<void> => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        run: (editor: editor.ICodeEditor, ..._args: any[]): void => {
             const token = findTokenAtPosition(editor, decompileResultRef.current, classListRef.current);
 
             if (!token) {
@@ -138,7 +141,8 @@ export function createViewInheritanceAction(
         label: "View Inheritance Hierarchy",
         contextMenuGroupId: "navigation",
         contextMenuOrder: 2,
-        run: async (_editor: editor.ICodeEditor, ..._args: any[]): Promise<void> => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        run: (_editor: editor.ICodeEditor, ..._args: any[]): void => {
             if (!decompileResultRef.current) {
                 messageApi.error("No decompile result available for inheritance view.");
 
